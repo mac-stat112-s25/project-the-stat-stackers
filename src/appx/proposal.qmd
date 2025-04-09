@@ -2,4 +2,13 @@
 title: "Proposal"
 ---
 
-Your proposal will go here.
+Group name: The Stat Stackers
+
+Group members: Owen Lindstrom, Madeleine Heafey, Rachel Kelly
+
+Description:
+
+We will be exploring the correlation between median housing income and academic outcomes (such as graduation rates, dropout rates, college readiness, enrollment etc) in Texas by county. We chose to study Texas because it is a large state with a lot of diversity in income, population density, political affiliation, etc and as such could help us understand these outcomes across the county.
+
+Rough implementation plan:
+- 
