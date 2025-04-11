@@ -1,13 +1,14 @@
 ---
-title: "owen_eda"
+title: "Dataviz"
 format: html
 ---
-
 
 ```{r Libraries, message=FALSE}
 library(readr)
 library(tidyverse)
 library(sf)
+library(tigris)
+
 ```
 
 ```{r Load Data}
@@ -164,3 +165,4 @@ ggplot(map_data_clean) +
     panel.grid.major = element_blank()
   )
 ```
+
