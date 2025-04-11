@@ -1,0 +1,61 @@
+---
+title: "Rachel's Data Exploration"
+format: html
+---
+
+
+```{r}
+head(final_data)
+```
+```{r}
+library(tidyverse)
+library(ggplot2)
+```
+```{r}
+summary(final_data)
+```
+```{r}
+summary_by_year <- final_data |>
+  group_by(Year) |>
+  summarize(
+    avg_income = mean(B19013_001E, na.rm = TRUE),
+    avg_enrollment = mean(enrollment, na.rm = TRUE),
+    avg_grad_rate = mean(FourYrGrad_Campus, na.rm = TRUE),
+    avg_attendance = mean(Attendance_All, na.rm = TRUE)
+  )
+```
+
+```{r}
+ggplot(summary_by_year, aes(x = factor(Year), y = avg_income)) +
+  geom_bar(stat = "identity", fill = "purple") +
+  labs(title = "Average Median Income by Year in Texas",
+       x = "Year",
+       y = "Median Household Income")
+```
+```{r}
+ggplot(summary_by_year, aes(x = factor(Year), y = avg_enrollment)) +
+  geom_bar(stat = "identity", fill = "darkblue") +
+  labs(title = "Average High School Enrollment by Year in Texas",
+       x = "Year",
+       y = "Enrollment")
+```
+
+```{r}
+ggplot(summary_by_year, aes(x = factor(Year), y = avg_attendance)) +
+  geom_bar(stat = "identity", fill = "darkmagenta") +
+  labs(title = "Average Attendance in Texas High Schools by Year",
+       x = "Year",
+       y = "Attendance Rate")
+```
+
+```{r}
+install.packages("DataExplorer")
+library(DataExplorer)
+```
+```{r}
+plot_intro(final_data)
+plot_missing(final_data)
+plot_histogram(final_data)      
+plot_correlation(final_data)
+```
+

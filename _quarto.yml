@@ -11,8 +11,8 @@ project:
 
 
 book:
-  title: "project title"
-  author: ["student 1 first and last name", "student 2 first and last name", "student 3 first and last name"]
+  title: "The Correlation between Median Housing Income and Educational Outcomes in Texas"
+  author: ["Owen Lindstrom", "Madeleine Heafey", "Rachel Kelly"]
   date: today  # use today to update date published based on last time project was edited
   date-format: full
   # favicon: images/logo.png
@@ -37,6 +37,16 @@ book:
 
   chapters:
     - index.qmd
+  
+  eda:
+    - EDA/rachel_eda.qmd
+    - EDA/owen_eda.qmd
+    - EDA/madeleine_eda.qmd
+    
+  effective-teamwork:
+    - effective_team/rachel_effective.qmd
+    - effective_team/owen_effective.qmd
+    - effective_team/madeleine_effective.qmd
 
   appendices:
   - src/appx/proposal.qmd

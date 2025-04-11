@@ -1,0 +1,168 @@
+---
+title: "Dataviz"
+format: html
+---
+
+```{r Libraries, message=FALSE}
+library(readr)
+library(tidyverse)
+library(sf)
+library(tigris)
+
+```
+
+```{r Load Data}
+final_data <- read.csv("/Users/owenlindstrom/Documents/2025/Stat 112/Final Project/project-the-stat-stackers/data/final_data.csv")
+```
+
+```{r County Load}
+tx_counties <- st_read("/Users/owenlindstrom/Documents/2025/Stat 112/Tx_CntyBndry_Jurisdictional_TIGER/Tx_CntyBndry_Jurisdictional_TIGER.shp")
+```
+
+```{r Prepare County Data for Merge}
+tx_counties <- tx_counties %>%
+  mutate(NAME_JOIN = str_c(NAME, ", Texas"))
+```
+
+```{r Prepare Outcome Data for Merge}
+final_data <- final_data %>%
+  mutate(Year = as.integer(Year))
+```
+
+```{r Merge Data for Mapping}
+map_data <- tx_counties %>%
+  left_join(final_data, by = c("NAME_JOIN" = "NAME"))
+```
+
+```{r Prep Map Data}
+map_data_clean <- map_data %>%
+  filter(!is.na(Year))
+```
+
+
+```{r Graduation Rate Map}
+ggplot(map_data_clean) +
+  geom_sf(aes(fill = FourYrGrad_Campus)) +
+  facet_wrap(~ Year, drop = TRUE) +
+  scale_fill_viridis_c(option = "magma", na.value = "gray90") +
+  labs(
+    title = "Four-Year Graduation Rate by County in Texas (by Year)",
+    fill  = "Grad Rate"
+  ) +
+  theme_minimal() +
+  theme(
+    axis.text.x  = element_blank(),
+    axis.text.y  = element_blank(),
+    axis.ticks   = element_blank(),
+    panel.grid.major = element_blank()
+  )
+```
+
+```{r Dropout Rate Maps}
+ggplot(map_data_clean) +
+  geom_sf(aes(fill = FourYrDrop_Campus)) +
+  facet_wrap(~ Year, drop = TRUE) +
+  scale_fill_viridis_c(option = "magma", na.value = "gray90") +
+  labs(
+    title = "Four-Year Dropout Rate by County in Texas (by Year)",
+    fill  = "Dropout Rate"
+  ) +
+  theme_minimal() +
+  theme(
+    axis.text.x  = element_blank(),
+    axis.text.y  = element_blank(),
+    axis.ticks   = element_blank(),
+    panel.grid.major = element_blank()
+  )
+```
+
+```{r Enrollment Maps}
+ggplot(map_data_clean) +
+  geom_sf(aes(fill = enrollment)) +
+  facet_wrap(~ Year, drop = TRUE) +
+  scale_fill_viridis_c(option = "magma", na.value = "gray90") +
+  labs(
+    title = "Enrollment by County in Texas (by Year)",
+    fill  = "Enrollment"
+  ) +
+  theme_minimal() +
+  theme(
+    axis.text.x  = element_blank(),
+    axis.text.y  = element_blank(),
+    axis.ticks   = element_blank(),
+    panel.grid.major = element_blank()
+  )
+```
+
+```{r College Math Maps}
+ggplot(map_data_clean) +
+  geom_sf(aes(fill = CollegeReady_Math_Campus)) +
+  facet_wrap(~ Year, drop = TRUE) +
+  scale_fill_viridis_c(option = "magma", na.value = "gray90") +
+  labs(
+    title = "College Math Readiness by County in Texas (by Year)",
+    fill  = "College Math Readiness"
+  ) +
+  theme_minimal() +
+  theme(
+    axis.text.x  = element_blank(),
+    axis.text.y  = element_blank(),
+    axis.ticks   = element_blank(),
+    panel.grid.major = element_blank()
+  )
+```
+
+```{r College Reading Maps}
+ggplot(map_data_clean) +
+  geom_sf(aes(fill = CollegeReady_Reading_Campus)) +
+  facet_wrap(~ Year, drop = TRUE) +
+  scale_fill_viridis_c(option = "magma", na.value = "gray90") +
+  labs(
+    title = "College Reading Readiness by County in Texas (by Year)",
+    fill  = "College Reading Readiness"
+  ) +
+  theme_minimal() +
+  theme(
+    axis.text.x  = element_blank(),
+    axis.text.y  = element_blank(),
+    axis.ticks   = element_blank(),
+    panel.grid.major = element_blank()
+  )
+```
+
+```{r Attendance Rate Maps}
+ggplot(map_data_clean) +
+  geom_sf(aes(fill = Attendance_All)) +
+  facet_wrap(~ Year, drop = TRUE) +
+  scale_fill_viridis_c(option = "magma", na.value = "gray90") +
+  labs(
+    title = "Attendance by County in Texas (by Year)",
+    fill  = "Attendace"
+  ) +
+  theme_minimal() +
+  theme(
+    axis.text.x  = element_blank(),
+    axis.text.y  = element_blank(),
+    axis.ticks   = element_blank(),
+    panel.grid.major = element_blank()
+  )
+```
+
+```{r County Income Maps}
+ggplot(map_data_clean) +
+  geom_sf(aes(fill = B19013_001E)) +
+  facet_wrap(~ Year, drop = TRUE) +
+  scale_fill_viridis_c(option = "magma", na.value = "gray90") +
+  labs(
+    title = "Income by County in Texas (by Year)",
+    fill  = "Income"
+  ) +
+  theme_minimal() +
+  theme(
+    axis.text.x  = element_blank(),
+    axis.text.y  = element_blank(),
+    axis.ticks   = element_blank(),
+    panel.grid.major = element_blank()
+  )
+```
+
