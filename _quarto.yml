@@ -39,9 +39,9 @@ book:
     - index.qmd
   
   eda:
-    - rachel_ead.qmd
-    - owen_ead.qmd
-    - madeleine_ead.qmd
+    - EDA/rachel_eda.qmd
+    - EDA/owen_eda.qmd
+    - EDA/madeleine_eda.qmd
 
   appendices:
   - src/appx/proposal.qmd
