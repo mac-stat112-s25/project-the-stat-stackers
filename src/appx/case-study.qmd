@@ -2,4 +2,10 @@
 title: "Case Study"
 ---
 
-Your case study will go here.
+Case study: [German elections article](https://fivethirtyeight.com/features/six-charts-to-help-americans-understand-the-upcoming-german-election/)
+
+Observations:
+
+The article did a good job keeping its audience in mind, and I particularly appreciated how it presented the relative liberal/conservative leanings of the parties relative to the American Democrats and Republicans. I wasn't really sure what they were basing those comparisons off of, though. I also think the article struck a good balance between text and visualizations, with about one viz for each section with a paragraph or two of analysis.
+
+I found the maps really useful, especially with the historical context of the West/East divide, but I didn't love how they weren't labeled with any numbers. Their regional support differences were striking, but I didn't get any sense of how that translated to relative popularity in general.
