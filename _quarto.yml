@@ -42,6 +42,11 @@ book:
     - EDA/rachel_eda.qmd
     - EDA/owen_eda.qmd
     - EDA/madeleine_eda.qmd
+    
+  effective-teamwork:
+    - effective_team/rachel_effective.qmd
+    - effective_team/owen_effective.qmd
+    - effective_team/madeleine_effective.qmd
 
   appendices:
   - src/appx/proposal.qmd
