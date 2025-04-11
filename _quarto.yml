@@ -37,8 +37,8 @@ book:
 
   chapters:
     - index.qmd
-    
-  EDA:
+  
+  eda:
     - rachel_ead.qmd
     - owen_ead.qmd
     - madeleine_ead.qmd
