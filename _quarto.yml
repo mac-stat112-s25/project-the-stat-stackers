@@ -38,15 +38,17 @@ book:
   chapters:
     - index.qmd
   
-  eda:
-    - EDA/rachel_eda.qmd
-    - EDA/owen_eda.qmd
-    - EDA/madeleine_eda.qmd
+    - part: "EDA"
+      chapters:
+      - src/eda/rachel-k.qmd
+      - src/eda/owen-l.qmd
+      - src/eda/madeleine-h.qmd
     
-  effective-teamwork:
-    - effective_team/rachel_effective.qmd
-    - effective_team/owen_effective.qmd
-    - effective_team/madeleine_effective.qmd
+    - part: "Effective Teamwork"
+      chapters:
+      - src/et/rachel-k.qmd
+      - src/et/owen-l.qmd
+      - src/et/madeleine-h.qmd
 
   appendices:
   - src/appx/proposal.qmd
