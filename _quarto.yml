@@ -49,6 +49,9 @@ book:
       - src/et/rachel-k.qmd
       - src/et/owen-l.qmd
       - src/et/madeleine-h.qmd
+      
+    - part: "Data Visualizations"
+      - src/dv/data.qmd
 
   appendices:
   - src/appx/proposal.qmd
