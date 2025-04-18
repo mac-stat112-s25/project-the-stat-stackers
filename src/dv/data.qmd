@@ -59,5 +59,13 @@ all_data |>
   ggplot() +
   geom_point(aes(x = B19013_001E, y = CollegeReady_Reading_Campus))
 
+#B19013_001E is the median household income
 ```
 
+##Observations
+
+Attendance rates do not vary significantly from year to year. This makes sense, as nothing really happened during the years we're looking at that would constitute an increase or decrease in attendance. 
+
+2014 sees a drop in College readiness for reading. We are in the midst of researching the potential cause for this drop, but likely it is a signifier of ongoing trends that we are still seeing of decreases in test scores across the nation that signify college readiness. This decrease is just increasing as more social, economic, and political factors affect student ability to prepare well for testing. As national cuts in funding for education continue, we are likely to continue seeing this drop that is present in 2014 in our data. 
+
+Additionally, we plotted the relationship between average household income and college readiness. We can see the general trend that students from on average higher household incomes are more college ready (based on test scores) than students who come from on average lower income areas. Of course, this is just a trend and not predictive of all college readiness. Also important to note that there are more data points between 40000 and 50000, meaning that there are more families from this economic range than higher or lower ranges. 
