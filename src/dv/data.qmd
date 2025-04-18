@@ -3,3 +3,23 @@ title: "Project Visualizations"
 format: html
 ---
 
+```{r}
+#Load packages
+
+library(tidyverse)
+library(ggplot2)
+library(mosaic)
+
+```
+
+##Basic Visualizations
+
+Exploring attendance across all years
+
+```{r}
+all_data <- read_csv("../../data/final_data.csv")
+```
+```{r}
+head(all_data)
+```
+
