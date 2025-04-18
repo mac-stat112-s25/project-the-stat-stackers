@@ -19,7 +19,45 @@ Exploring attendance across all years
 ```{r}
 all_data <- read_csv("../../data/final_data.csv")
 ```
+
 ```{r}
 head(all_data)
+
+all_data |>
+  group_by(Year) |>
+  summarize(avg_attendance = mean(Attendance_All)) |>
+  ggplot(aes(x = as.factor(Year), y = avg_attendance)) +
+  geom_point()
+
+all_data |>
+  group_by(Year) |>
+  summarize(avg_attendance = mean(Attendance_All)) |>
+  ggplot(aes(x = as.factor(Year), y = avg_attendance)) +
+  geom_point() +
+  ylim(0, 1)
+
+all_data |>
+  group_by(Year) |>
+  summarize(avg_enrollment = mean(enrollment)) |>
+  ggplot(aes(x = as.factor(Year), y = avg_enrollment)) +
+  geom_point()
+
+all_data |>
+  group_by(Year) |>
+  summarize(avg_reading = mean(CollegeReady_Reading_Campus, na.rm = TRUE)) |>
+  ggplot(aes(x = Year, y = avg_reading)) +
+  geom_point() +
+  geom_line() +
+  ylim(0, 1)
+
+```
+
+```{r}
+
+all_data |>
+  filter(Year == "2014") |>
+  ggplot() +
+  geom_point(aes(x = B19013_001E, y = CollegeReady_Reading_Campus))
+
 ```
 
