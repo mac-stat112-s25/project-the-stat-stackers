@@ -1,5 +1,0 @@
----
-title: "rachel_effective"
-format: html
----
-

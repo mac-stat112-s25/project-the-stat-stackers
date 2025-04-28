@@ -1,0 +1,23 @@
+---
+title: "madeleine_eda"
+format: html
+---
+
+```{r}
+
+library(tidyverse)
+library(DataExplorer)
+
+getwd()
+
+final_data <- read_csv("~/Documents/GitHub/project-the-stat-stackers/data/final_data.csv")
+
+```
+```{r}
+
+introduce(final_data)
+plot_intro(final_data)
+plot_missing(final_data)
+
+
+```

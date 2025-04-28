@@ -1,5 +1,0 @@
----
-title: "owen_effective"
-format: html
----
-
