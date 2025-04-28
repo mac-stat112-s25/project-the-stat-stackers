@@ -51,7 +51,9 @@ book:
       - src/et/madeleine-h.qmd
       
     - part: "Data Visualizations"
+      chapters:
       - src/dv/data.qmd
+      - data/Dataviz.qmd
 
   appendices:
   - src/appx/proposal.qmd
