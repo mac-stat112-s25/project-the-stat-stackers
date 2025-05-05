@@ -2,6 +2,11 @@
 title: "Rachel's Data Exploration"
 format: html
 ---
+```{r}
+library(readr)
+library(here)
+final_data <- read_csv(here("data","final_data.csv"))
+```
 
 
 ```{r}
@@ -14,6 +19,7 @@ library(ggplot2)
 ```{r}
 summary(final_data)
 ```
+
 ```{r}
 summary_by_year <- final_data |>
   group_by(Year) |>
@@ -49,7 +55,6 @@ ggplot(summary_by_year, aes(x = factor(Year), y = avg_attendance)) +
 ```
 
 ```{r}
-install.packages("DataExplorer")
 library(DataExplorer)
 ```
 ```{r}
