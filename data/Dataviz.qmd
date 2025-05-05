@@ -9,14 +9,15 @@ library(tidyverse)
 library(sf)
 library(gganimate)
 library(scales)
+library(here)
 ```
 
 ```{r Load Data}
-final_data <- read.csv("/Users/owenlindstrom/Documents/2025/Stat 112/Final Project/project-the-stat-stackers/data/final_data.csv")
+final_data <- read.csv(here("data","final_data.csv"))
 ```
 
 ```{r County Load}
-tx_counties <- st_read("/Users/owenlindstrom/Documents/2025/Stat 112/Tx_CntyBndry_Jurisdictional_TIGER/Tx_CntyBndry_Jurisdictional_TIGER.shp")
+tx_counties <- st_read(here("data", "Tx_CntyBndry_Jurisdictional_TIGER.shp"))
 ```
 
 ```{r Prepare County Data for Merge}
