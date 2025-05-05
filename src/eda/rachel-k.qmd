@@ -4,7 +4,8 @@ format: html
 ---
 ```{r}
 library(readr)
-final_data <- read_csv("~/Desktop/Data Science/project-the-stat-stackers/data/final_data.csv")
+library(here)
+final_data <- read_csv(here("data","final_data.csv"))
 ```
 
 
