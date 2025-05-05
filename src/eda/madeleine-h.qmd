@@ -5,12 +5,13 @@ format: html
 
 ```{r}
 
+library(here)
 library(tidyverse)
 library(DataExplorer)
 
 getwd()
 
-final_data <- read_csv("~/Documents/GitHub/project-the-stat-stackers/data/final_data.csv")
+final_data <- read_csv(here("data", "final_data.csv"))
 
 ```
 ```{r}
