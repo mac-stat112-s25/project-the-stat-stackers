@@ -167,40 +167,6 @@ ggplot(map_data_clean) +
   )
 ```
 
-```{r scroll map, message=FALSE}
-library(ggplot2)
-library(dplyr)
-library(sf)
-library(viridis)      # If you want to use scale_fill_viridis_c
-# library(gganimate)  # Already loaded
-
-# Assume map_data_clean is already created as in your code
-
-p <- ggplot(map_data_clean, aes(fill = FourYrGrad_Campus)) +
-  geom_sf() +
-  scale_fill_viridis_c(option = "magma", na.value = "gray90") +
-  labs(
-    title = "Four-Year Graduation Rate by County in Texas: {frame_time}",
-    fill  = "Grad Rate"
-  ) +
-  theme_minimal() +
-  theme(
-    axis.text.x  = element_blank(),
-    axis.text.y  = element_blank(),
-    axis.ticks   = element_blank(),
-    panel.grid.major = element_blank()
-  ) +
-  transition_time(Year)
-
-# Render the animation (in RStudio, this will display in the viewer)
-animate(
-  p,
-  nframes  = 50,
-  fps      = 5,
-  renderer = gifski_renderer("/Users/owenlindstrom/Documents/2025/Stat 112/Final Project/my_animation.gif")
-)
-
-```
 
 ```{r Map test two}
 library(tmap)
