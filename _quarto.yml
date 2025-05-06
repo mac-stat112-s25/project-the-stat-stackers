@@ -29,7 +29,7 @@ book:
 
 
   sidebar:
-    title: "sidebar title"
+    title: "Website Navigation"
     collapse-level: 2
     style: "docked"
     pinned: true

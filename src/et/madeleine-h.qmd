@@ -1,5 +1,5 @@
 ---
-title: "madeleine_effective"
+title: "Madeleine's Effective Teamwork"
 format: html
 ---
 
