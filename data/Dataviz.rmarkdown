@@ -40,7 +40,6 @@ map_data_clean <- map_data %>%
   filter(!is.na(Year))
 ```
 
-
 ```{r Graduation Rate Map}
 ggplot(map_data_clean) +
   geom_sf(aes(fill = FourYrGrad_Campus)) +

@@ -8,6 +8,7 @@ format: html
 library(readr)
 library(tidyverse)
 library(sf)
+library(here)
 ```
 
 ```{r Load Data}
@@ -129,23 +130,6 @@ ggplot(map_data_clean) +
   )
 ```
 
-```{r Attendance Rate Maps}
-ggplot(map_data_clean) +
-  geom_sf(aes(fill = Attendance_All)) +
-  facet_wrap(~ Year, drop = TRUE) +
-  scale_fill_viridis_c(option = "magma", na.value = "gray90") +
-  labs(
-    title = "Attendance by County in Texas (by Year)",
-    fill  = "Attendace"
-  ) +
-  theme_minimal() +
-  theme(
-    axis.text.x  = element_blank(),
-    axis.text.y  = element_blank(),
-    axis.ticks   = element_blank(),
-    panel.grid.major = element_blank()
-  )
-```
 
 ```{r County Income Maps}
 ggplot(map_data_clean) +
