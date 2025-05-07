@@ -6,6 +6,7 @@ code-fold: false  # change to true to fold the code chunks
 ---
 
 Our group decided to look at the relationship between median housing income across counties in Texas and educational outcomes. Median income information is available through census data and educational data is made public by individual school reporting methods. At the beginning of our project, we included these educational outcomes: graduation rates, college readiness scores, and attendance rates.  We crafted the following guiding research questions:
+
 - What is the relationship between median household income and educational outcomes in Texas?
 - Across all counties, what is the range of median household income?
 - What are the trends in educational outcomes in Texas across the counties?
