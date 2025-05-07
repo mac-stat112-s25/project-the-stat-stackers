@@ -1,5 +1,5 @@
 ---
-title: "Rachel's Data Exploration"
+title: "Rachel K"
 format: html
 ---
 ```{r}

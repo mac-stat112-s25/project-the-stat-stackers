@@ -38,17 +38,17 @@ book:
   chapters:
     - index.qmd
   
+   - part: "Effective Teamwork"
+      chapters:
+      - src/et/rachel-k.qmd
+      - src/et/owen-l.qmd
+      - src/et/madeleine-h.qmd
+      
     - part: "EDA"
       chapters:
       - src/eda/rachel-k.qmd
       - src/eda/owen-l.qmd
       - src/eda/madeleine-h.qmd
-    
-    - part: "Effective Teamwork"
-      chapters:
-      - src/et/rachel-k.qmd
-      - src/et/owen-l.qmd
-      - src/et/madeleine-h.qmd
       
     - part: "Data Visualizations"
       chapters:
