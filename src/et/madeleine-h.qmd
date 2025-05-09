@@ -3,3 +3,20 @@ title: "Madeleine H"
 format: html
 ---
 
+[The Basics of Working on Teams](https://hr.mit.edu/learning-topics/teams/articles/basics)
+
+Summary
+
+Not every work group is necessarily a "team"
+
+Teams:
+- Are collective as opposed to individualistic "work groups"
+- Have a clearly defined purpose
+- Have a shared commitment to the process and outcomes
+
+Effective teams specifically have all the above characteristics as well as:
+- Clearly defined roles and responsibilities
+- Ground rules
+- "Effective group process" which includes open communication and accountability
+
+When all these conditions are met, working on a team can be an "exciting and empowering experience" where the team members work as a coordinated group to produce something bigger than themselves.
