@@ -3,7 +3,7 @@ title: "Owen L"
 format: html
 ---
 
-Website: https://www.wework.com/ideas/professional-development/management-leadership/nine-characteristics-of-great-teamwork
+[Website](https://www.wework.com/ideas/professional-development/management-leadership/nine-characteristics-of-great-teamwork)
 
 Summary of "Nine characteristics of great teamwork"
 
@@ -14,6 +14,7 @@ Effective teams are built in environments that are trusting, supportive, and non
 The best teams are self motivated.
 
 Teams need:
+
 - good communication
 - individual talent
 - sense of belonging
