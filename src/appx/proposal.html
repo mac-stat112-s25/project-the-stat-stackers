@@ -291,10 +291,9 @@ cookieconsent.run({
     <h2 id="toc-title">Table of contents</h2>
    
   <ul>
-  <li><a href="#description" id="toc-description" class="nav-link active" data-scroll-target="#description"><span class="header-section-number">B</span> Description:</a>
-  <ul class="collapse">
-  <li><a href="#rough-implementation-plan" id="toc-rough-implementation-plan" class="nav-link" data-scroll-target="#rough-implementation-plan"><span class="header-section-number">B.1</span> Rough implementation plan:</a></li>
-  </ul></li>
+  <li><a href="#description" id="toc-description" class="nav-link active" data-scroll-target="#description"><span class="header-section-number">A.1</span> Description:</a></li>
+  <li><a href="#inspiration" id="toc-inspiration" class="nav-link" data-scroll-target="#inspiration"><span class="header-section-number">A.2</span> Inspiration:</a></li>
+  <li><a href="#rough-implementation-plan" id="toc-rough-implementation-plan" class="nav-link" data-scroll-target="#rough-implementation-plan"><span class="header-section-number">A.3</span> Rough implementation plan:</a></li>
   </ul>
 </nav>
     </div>
@@ -320,13 +319,19 @@ cookieconsent.run({
 </header>
 
 
+<p>Project Title: The Correlation between Median Housing Income and Educational Outcomes in Texas</p>
 <p>Group name: The Stat Stackers</p>
 <p>Group members: Owen Lindstrom, Madeleine Heafey, Rachel Kelly</p>
-<section id="description" class="level1" data-number="B">
-<h1 data-number="B"><span class="header-section-number">B</span> Description:</h1>
+<section id="description" class="level2" data-number="A.1">
+<h2 data-number="A.1" class="anchored" data-anchor-id="description"><span class="header-section-number">A.1</span> Description:</h2>
 <p>We will be exploring the correlation between median housing income and academic outcomes (such as graduation rates, dropout rates, college readiness, enrollment etc) in Texas by county. We chose to study Texas because it is a large state with a lot of diversity in income, population density, political affiliation, etc and as such could help us understand these outcomes across the county.</p>
-<section id="rough-implementation-plan" class="level2" data-number="B.1">
-<h2 data-number="B.1" class="anchored" data-anchor-id="rough-implementation-plan"><span class="header-section-number">B.1</span> Rough implementation plan:</h2>
+</section>
+<section id="inspiration" class="level2" data-number="A.2">
+<h2 data-number="A.2" class="anchored" data-anchor-id="inspiration"><span class="header-section-number">A.2</span> Inspiration:</h2>
+<p>As students, we all feel strongly that correlations between income and educational outcomes should be explored so we can implement systems that better support all students as they navigate the educational system. Education is not equally accessible and we currently live in a world where neighborhood and living location impacts the quality of education one has access to. This varies state to state, but we wanted to see what correlations we might be able to discern from the public education and census data to look at this issue more closely.</p>
+</section>
+<section id="rough-implementation-plan" class="level2" data-number="A.3">
+<h2 data-number="A.3" class="anchored" data-anchor-id="rough-implementation-plan"><span class="header-section-number">A.3</span> Rough implementation plan:</h2>
 <ul>
 <li>Owen is utilizing data from his honors project on Texas which we will use to craft parts of our data analysis.</li>
 <li>Rachel found census data that we will wrangle as a group to layer with the data Owen has already provided.</li>
@@ -338,7 +343,6 @@ cookieconsent.run({
 
 <!-- -->
 
-</section>
 </section>
 
 </main> <!-- /main -->
@@ -978,21 +982,27 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 <span id="cb1-2"><a href="#cb1-2"></a><span class="an">title:</span><span class="co"> "Proposal"</span></span>
 <span id="cb1-3"><a href="#cb1-3"></a><span class="co">---</span></span>
 <span id="cb1-4"><a href="#cb1-4"></a></span>
-<span id="cb1-5"><a href="#cb1-5"></a>Group name: The Stat Stackers</span>
+<span id="cb1-5"><a href="#cb1-5"></a>Project Title: The Correlation between Median Housing Income and Educational Outcomes in Texas</span>
 <span id="cb1-6"><a href="#cb1-6"></a></span>
-<span id="cb1-7"><a href="#cb1-7"></a>Group members: Owen Lindstrom, Madeleine Heafey, Rachel Kelly</span>
+<span id="cb1-7"><a href="#cb1-7"></a>Group name: The Stat Stackers</span>
 <span id="cb1-8"><a href="#cb1-8"></a></span>
-<span id="cb1-9"><a href="#cb1-9"></a><span class="fu"># Description:</span></span>
+<span id="cb1-9"><a href="#cb1-9"></a>Group members: Owen Lindstrom, Madeleine Heafey, Rachel Kelly</span>
 <span id="cb1-10"><a href="#cb1-10"></a></span>
-<span id="cb1-11"><a href="#cb1-11"></a>We will be exploring the correlation between median housing income and academic outcomes (such as graduation rates, dropout rates, college readiness, enrollment etc) in Texas by county. We chose to study Texas because it is a large state with a lot of diversity in income, population density, political affiliation, etc and as such could help us understand these outcomes across the county.</span>
+<span id="cb1-11"><a href="#cb1-11"></a><span class="fu">## Description:</span></span>
 <span id="cb1-12"><a href="#cb1-12"></a></span>
-<span id="cb1-13"><a href="#cb1-13"></a><span class="fu">## Rough implementation plan:</span></span>
+<span id="cb1-13"><a href="#cb1-13"></a>We will be exploring the correlation between median housing income and academic outcomes (such as graduation rates, dropout rates, college readiness, enrollment etc) in Texas by county. We chose to study Texas because it is a large state with a lot of diversity in income, population density, political affiliation, etc and as such could help us understand these outcomes across the county.</span>
 <span id="cb1-14"><a href="#cb1-14"></a></span>
-<span id="cb1-15"><a href="#cb1-15"></a><span class="ss">- </span>Owen is utilizing data from his honors project on Texas which we will use to craft parts of our data analysis.</span>
-<span id="cb1-16"><a href="#cb1-16"></a><span class="ss">- </span>Rachel found census data that we will wrangle as a group to layer with the data Owen has already provided.</span>
-<span id="cb1-17"><a href="#cb1-17"></a><span class="ss">- </span>Madeleine is reading the case study and will summarize it for the group</span>
-<span id="cb1-18"><a href="#cb1-18"></a><span class="ss">- </span>The three of us (four of us if you count "Ghost") are going to wrangle the data and figure out what we want to explore together during class time.</span>
-<span id="cb1-19"><a href="#cb1-19"></a><span class="ss">- </span>The three of us will also create the presentation together during class. </span></code><button title="Copy to Clipboard" class="code-copy-button" data-in-quarto-modal=""><i class="bi"></i></button></pre></div>
+<span id="cb1-15"><a href="#cb1-15"></a><span class="fu">## Inspiration:</span></span>
+<span id="cb1-16"><a href="#cb1-16"></a></span>
+<span id="cb1-17"><a href="#cb1-17"></a>As students, we all feel strongly that correlations between income and educational outcomes should be explored so we can implement systems that better support all students as they navigate the educational system. Education is not equally accessible and we currently live in a world where neighborhood and living location impacts the quality of education one has access to. This varies state to state, but we wanted to see what correlations we might be able to discern from the public education and census data to look at this issue more closely.</span>
+<span id="cb1-18"><a href="#cb1-18"></a></span>
+<span id="cb1-19"><a href="#cb1-19"></a><span class="fu">## Rough implementation plan:</span></span>
+<span id="cb1-20"><a href="#cb1-20"></a></span>
+<span id="cb1-21"><a href="#cb1-21"></a><span class="ss">- </span>Owen is utilizing data from his honors project on Texas which we will use to craft parts of our data analysis.</span>
+<span id="cb1-22"><a href="#cb1-22"></a><span class="ss">- </span>Rachel found census data that we will wrangle as a group to layer with the data Owen has already provided.</span>
+<span id="cb1-23"><a href="#cb1-23"></a><span class="ss">- </span>Madeleine is reading the case study and will summarize it for the group</span>
+<span id="cb1-24"><a href="#cb1-24"></a><span class="ss">- </span>The three of us (four of us if you count "Ghost") are going to wrangle the data and figure out what we want to explore together during class time.</span>
+<span id="cb1-25"><a href="#cb1-25"></a><span class="ss">- </span>The three of us will also create the presentation together during class. </span></code><button title="Copy to Clipboard" class="code-copy-button" data-in-quarto-modal=""><i class="bi"></i></button></pre></div>
 </div></div></div></div></div>
 </div> <!-- /content -->
 <footer class="footer">

@@ -288,11 +288,19 @@ cookieconsent.run({
 </nav>
 <div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
 <!-- margin-sidebar -->
-    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
-        
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#project-story" id="toc-project-story" class="nav-link active" data-scroll-target="#project-story"><span class="header-section-number">0.1</span> Project Story</a></li>
+  <li><a href="#final-presentation-video" id="toc-final-presentation-video" class="nav-link" data-scroll-target="#final-presentation-video"><span class="header-section-number">0.2</span> Final Presentation Video</a></li>
+  <li><a href="#slide-deck-pdf" id="toc-slide-deck-pdf" class="nav-link" data-scroll-target="#slide-deck-pdf"><span class="header-section-number">0.3</span> Slide Deck (PDF)</a></li>
+  </ul>
+</nav>
     </div>
 <!-- main -->
-<main class="content column-page-right" id="quarto-document-content">
+<main class="content column-body" id="quarto-document-content">
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
@@ -301,7 +309,7 @@ cookieconsent.run({
 
 
 
-<div class="quarto-title-meta column-page-right">
+<div class="quarto-title-meta column-body">
 
     <div>
     <div class="quarto-title-meta-heading">Authors</div>
@@ -315,7 +323,7 @@ cookieconsent.run({
     <div>
     <div class="quarto-title-meta-heading">Published</div>
     <div class="quarto-title-meta-contents">
-      <p class="date">Wednesday, May 7, 2025</p>
+      <p class="date">Friday, May 9, 2025</p>
     </div>
   </div>
   
@@ -327,19 +335,34 @@ cookieconsent.run({
 </header>
 
 
-<p>Our group decided to look at the relationship between median housing income across counties in Texas and educational outcomes. Median income information is available through census data and educational data is made public by individual school reporting methods. At the beginning of our project, we included these educational outcomes: graduation rates, college readiness scores, and attendance rates. We crafted the following guiding research questions:</p>
+<section id="project-story" class="level2" data-number="0.1">
+<h2 data-number="0.1" class="anchored" data-anchor-id="project-story"><span class="header-section-number">0.1</span> Project Story</h2>
+<p>Our group decided to look at the relationship between median housing income across counties in Texas and educational outcomes. As students, we are all interested in how people are impacted in their educational choices and outcomes based on where they live, average economic trends, and other factors that tend to be outside individual control and signifiers of larger racist and classist structures. We wanted our project to showcase some potential trends and links between average household income and educational outcomes because that analysis is related to larger issues across our country. This project is important because understanding where we are and what the current links between education and income is crucial in crafting any type of policy solution to seeks to solve this issue in the future.</p>
+<p>Median income information is available through census data and educational data is made public by individual school reporting methods. We got our census data in April of 2025 but are using data from the year range of 2010-2019. We acquired our educational data at the beginning of 2025 and adjusted it in April 2025 to fit this project. Texas Education Agency is what schools in Texas report their data to, which is also where we got educational data from. A Texas shapefile was also used to make our maps. Because we used a shapefile, we needed to align our county names with each data set before we could visualize anything. Additionally, we took out counties that were missing educational data from our ten-year time frame, which is why there are some missing counties on our visualizations.</p>
+<p>At the beginning of our project, we included these educational outcomes: graduation rates, college readiness scores, and attendance rates. We crafted the following guiding research questions:</p>
 <ul>
 <li>What is the relationship between median household income and educational outcomes in Texas?</li>
 <li>Across all counties, what is the range of median household income?</li>
 <li>What are the trends in educational outcomes in Texas across the counties?</li>
 </ul>
-<p>As we began our initial analysis, somethings became clear. First, our median income data is by county. Urban counties that house cities like Austin, Houston, and Dallas have higher median incomes, but also have larger populations which means they have more schools and a larger student body to draw information from. This also means that educational data from larger urban centers is less volatile than potential outcomes from smaller communities. The same number of students could not graduate at a high school in Dallas as a high school in rural Texas, but that is unlikely to greatly impact the Dallas county data. However, the smaller population will be more impacted by the same number. Additionally, we discovered that the way high schools determined college readiness shifted during out ten year timeline from 2010 to 2019, making the data about college readiness hard to accruately visualize on a map.</p>
+<p>As we began our initial analysis, somethings became clear. First, our median income data is by county. Urban counties that house cities like Austin, Houston, and Dallas have higher median incomes, but also have larger populations which means they have more schools and a larger student body to draw information from. This also means that educational data from larger urban centers is less volatile than potential outcomes from smaller communities. The same number of students could not graduate at a high school in Dallas as a high school in rural Texas, but that is unlikely to greatly impact the Dallas county data. However, the smaller population will be more impacted by the same number. Additionally, we discovered that the way high schools determined college readiness shifted during out ten year timeline from 2010 to 2019, making the data about college readiness hard to accurately visualize on a map.</p>
 <p>However, we still felt that visualizing the greater trends between educational outcomes and median income in counties in Texas could be valuable. We discovered some interesting trends. First, the average median income across Texas increases during our ten year timeline. This aligns with national economic trends in the US. We also noticed that there is a relatively steady attendance rate across the state over the ten years, meaning that nothing significant happened and attendance rates never severely dropped. We also see that as a general trend, areas that have on average higher median incomes don’t necessarily have higher graduation rates. This is likely because of the higher sample size of student populations in the urban centers that both see higher average incomes and lower graduation rates by county. However, the differences across counties are relatively minimal when it comes to graduation rates according to the maps we made. There is also a relationship between test scores and median income. Generally, counties with higher median incomes also have higher average test scores (that indicate college readiness) which is likely due to increased resources in those areas to help students prepare for national testing.</p>
 <p>We also want to note that we had to remove counties in our visualizations that didn’t report educational data for each year that we looked at. That is why there are gaps in the map visualizations. Additionally, educational outcomes have selection bias, so while these are trends we noticed, this data does not determine educational success across the state of Texas at all. Our data also doesn’t account for impacts to education like COVID-19 which surely had a great impact on the educational outcomes for students across the state, nationally, and globally.</p>
+<p>There is of course, room for improvement. If we had more time, it would be interesting to see if we could compare smaller spatial data. Median income per county is much broader than educational data, which comes on a campus by campus scale. As such, there is much variation within some counties around types of schools and related income data. Someone could take what we’ve started and make it more comprehensive, while looking on a more micro level at the correlation between income levels and student success at individual schools instead of general county trends. Additionally, moving to look at more than just the state of Texas could also be interesting. Showing maps that categorize the types of school in different locations could also be interesting. How does public, private, charter, magnet and the various types of schools that exist impact student success? And who goes to these differing schools? Our project is much broader which means it is harder to come to concrete conclusions aside from basic correlation.</p>
+</section>
+<section id="final-presentation-video" class="level2" data-number="0.2">
+<h2 data-number="0.2" class="anchored" data-anchor-id="final-presentation-video"><span class="header-section-number">0.2</span> Final Presentation Video</h2>
+<div class="quarto-video ratio ratio-16x9"><iframe data-external="1" src="https://www.youtube.com/embed/8YsXNfdFj_0" title="" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen=""></iframe></div>
+</section>
+<section id="slide-deck-pdf" class="level2" data-number="0.3">
+<h2 data-number="0.3" class="anchored" data-anchor-id="slide-deck-pdf"><span class="header-section-number">0.3</span> Slide Deck (PDF)</h2>
+<iframe src="data/Final Project Presentation.pdf" width="100%" height="600px" style="border:none;">
+</iframe>
 
 
 <!-- -->
 
+</section>
 
 </main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
@@ -962,7 +985,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
   }
 });
 </script>
-<nav class="page-navigation column-page-right">
+<nav class="page-navigation column-body">
   <div class="nav-page nav-page-previous">
   </div>
   <div class="nav-page nav-page-next">
@@ -978,18 +1001,34 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 <span id="cb1-5"><a href="#cb1-5"></a><span class="an">code-fold:</span><span class="co"> false  # change to true to fold the code chunks</span></span>
 <span id="cb1-6"><a href="#cb1-6"></a><span class="co">---</span></span>
 <span id="cb1-7"><a href="#cb1-7"></a></span>
-<span id="cb1-8"><a href="#cb1-8"></a>Our group decided to look at the relationship between median housing income across counties in Texas and educational outcomes. Median income information is available through census data and educational data is made public by individual school reporting methods. At the beginning of our project, we included these educational outcomes: graduation rates, college readiness scores, and attendance rates.  We crafted the following guiding research questions:</span>
+<span id="cb1-8"><a href="#cb1-8"></a><span class="fu">## Project Story</span></span>
 <span id="cb1-9"><a href="#cb1-9"></a></span>
-<span id="cb1-10"><a href="#cb1-10"></a><span class="ss">- </span>What is the relationship between median household income and educational outcomes in Texas?</span>
-<span id="cb1-11"><a href="#cb1-11"></a><span class="ss">- </span>Across all counties, what is the range of median household income?</span>
-<span id="cb1-12"><a href="#cb1-12"></a><span class="ss">- </span>What are the trends in educational outcomes in Texas across the counties?</span>
+<span id="cb1-10"><a href="#cb1-10"></a>Our group decided to look at the relationship between median housing income across counties in Texas and educational outcomes. As students, we are all interested in how people are impacted in their educational choices and outcomes based on where they live, average economic trends, and other factors that tend to be outside individual control and signifiers of larger racist and classist structures. We wanted our project to showcase some potential trends and links between average household income and educational outcomes because that analysis is related to larger issues across our country. This project is important because understanding where we are and what the current links between education and income is crucial in crafting any type of policy solution to seeks to solve this issue in the future. </span>
+<span id="cb1-11"><a href="#cb1-11"></a></span>
+<span id="cb1-12"><a href="#cb1-12"></a>Median income information is available through census data and educational data is made public by individual school reporting methods. We got our census data in April of 2025 but are using data from the year range of 2010-2019. We acquired our educational data at the beginning of 2025 and adjusted it in April 2025 to fit this project. Texas Education Agency is what schools in Texas report their data to, which is also where we got educational data from. A Texas shapefile was also used to make our maps. Because we used a shapefile, we needed to align our county names with each data set before we could visualize anything. Additionally, we took out counties that were missing educational data from our ten-year time frame, which is why there are some missing counties on our visualizations. </span>
 <span id="cb1-13"><a href="#cb1-13"></a></span>
-<span id="cb1-14"><a href="#cb1-14"></a>As we began our initial analysis, somethings became clear. First, our median income data is by county. Urban counties that house cities like Austin, Houston, and Dallas have higher median incomes, but also have larger populations which means they have more schools and a larger student body to draw information from. This also means that educational data from larger urban centers is less volatile than potential outcomes from smaller communities. The same number of students could not graduate at a high school in Dallas as a high school in rural Texas, but that is unlikely to greatly impact the Dallas county data. However, the smaller population will be more impacted by the same number. Additionally, we discovered that the way high schools determined college readiness shifted during out ten year timeline from 2010 to 2019, making the data about college readiness hard to accruately visualize on a map.</span>
+<span id="cb1-14"><a href="#cb1-14"></a>At the beginning of our project, we included these educational outcomes: graduation rates, college readiness scores, and attendance rates.  We crafted the following guiding research questions:</span>
 <span id="cb1-15"><a href="#cb1-15"></a></span>
-<span id="cb1-16"><a href="#cb1-16"></a>However, we still felt that visualizing the greater trends between educational outcomes and median income in counties in Texas could be valuable. We discovered some interesting trends. First, the average median income across Texas increases during our ten year timeline. This aligns with national economic trends in the US. We also noticed that there is a relatively steady attendance rate across the state over the ten years, meaning that nothing significant happened and attendance rates never severely dropped. We also see that as a general trend, areas that have on average higher median incomes don't necessarily have higher graduation rates. This is likely because of the higher sample size of student populations in the urban centers that both see higher average incomes and lower graduation rates by county. However, the differences across counties are relatively minimal when it comes to graduation rates according to the maps we made. There is also a relationship between test scores and median income. Generally, counties with higher median incomes also have higher average test scores (that indicate college readiness) which is likely due to increased resources in those areas to help students prepare for national testing. </span>
-<span id="cb1-17"><a href="#cb1-17"></a></span>
-<span id="cb1-18"><a href="#cb1-18"></a>We also want to note that we had to remove counties in our visualizations that didn't report educational data for each year that we looked at. That is why there are gaps in the map visualizations. Additionally, educational outcomes have selection bias, so while these are trends we noticed, this data does not determine educational success across the state of Texas at all. Our data also doesn't account for impacts to education like COVID-19 which surely had a great impact on the educational outcomes for students across the state, nationally, and globally. </span>
-<span id="cb1-19"><a href="#cb1-19"></a></span></code><button title="Copy to Clipboard" class="code-copy-button" data-in-quarto-modal=""><i class="bi"></i></button></pre></div>
+<span id="cb1-16"><a href="#cb1-16"></a><span class="ss">- </span>What is the relationship between median household income and educational outcomes in Texas?</span>
+<span id="cb1-17"><a href="#cb1-17"></a><span class="ss">- </span>Across all counties, what is the range of median household income?</span>
+<span id="cb1-18"><a href="#cb1-18"></a><span class="ss">- </span>What are the trends in educational outcomes in Texas across the counties?</span>
+<span id="cb1-19"><a href="#cb1-19"></a></span>
+<span id="cb1-20"><a href="#cb1-20"></a>As we began our initial analysis, somethings became clear. First, our median income data is by county. Urban counties that house cities like Austin, Houston, and Dallas have higher median incomes, but also have larger populations which means they have more schools and a larger student body to draw information from. This also means that educational data from larger urban centers is less volatile than potential outcomes from smaller communities. The same number of students could not graduate at a high school in Dallas as a high school in rural Texas, but that is unlikely to greatly impact the Dallas county data. However, the smaller population will be more impacted by the same number. Additionally, we discovered that the way high schools determined college readiness shifted during out ten year timeline from 2010 to 2019, making the data about college readiness hard to accurately visualize on a map.</span>
+<span id="cb1-21"><a href="#cb1-21"></a></span>
+<span id="cb1-22"><a href="#cb1-22"></a>However, we still felt that visualizing the greater trends between educational outcomes and median income in counties in Texas could be valuable. We discovered some interesting trends. First, the average median income across Texas increases during our ten year timeline. This aligns with national economic trends in the US. We also noticed that there is a relatively steady attendance rate across the state over the ten years, meaning that nothing significant happened and attendance rates never severely dropped. We also see that as a general trend, areas that have on average higher median incomes don't necessarily have higher graduation rates. This is likely because of the higher sample size of student populations in the urban centers that both see higher average incomes and lower graduation rates by county. However, the differences across counties are relatively minimal when it comes to graduation rates according to the maps we made. There is also a relationship between test scores and median income. Generally, counties with higher median incomes also have higher average test scores (that indicate college readiness) which is likely due to increased resources in those areas to help students prepare for national testing. </span>
+<span id="cb1-23"><a href="#cb1-23"></a></span>
+<span id="cb1-24"><a href="#cb1-24"></a>We also want to note that we had to remove counties in our visualizations that didn't report educational data for each year that we looked at. That is why there are gaps in the map visualizations. Additionally, educational outcomes have selection bias, so while these are trends we noticed, this data does not determine educational success across the state of Texas at all. Our data also doesn't account for impacts to education like COVID-19 which surely had a great impact on the educational outcomes for students across the state, nationally, and globally. </span>
+<span id="cb1-25"><a href="#cb1-25"></a></span>
+<span id="cb1-26"><a href="#cb1-26"></a>There is of course, room for improvement. If we had more time, it would be interesting to see if we could compare smaller spatial data. Median income per county is much broader than educational data, which comes on a campus by campus scale. As such, there is much variation within some counties around types of schools and related income data. Someone could take what we've started and make it more comprehensive, while looking on a more micro level at the correlation between income levels and student success at individual schools instead of general county trends. Additionally, moving to look at more than just the state of Texas could also be interesting. Showing maps that categorize the types of school in different locations could also be interesting. How does public, private, charter, magnet and the various types of schools that exist impact student success? And who goes to these differing schools? Our project is much broader which means it is harder to come to concrete conclusions aside from basic correlation.</span>
+<span id="cb1-27"><a href="#cb1-27"></a></span>
+<span id="cb1-28"><a href="#cb1-28"></a><span class="fu">## Final Presentation Video</span></span>
+<span id="cb1-29"><a href="#cb1-29"></a></span>
+<span id="cb1-30"><a href="#cb1-30"></a>{{&lt; video https://youtu.be/8YsXNfdFj_0 &gt;}}</span>
+<span id="cb1-31"><a href="#cb1-31"></a></span>
+<span id="cb1-32"><a href="#cb1-32"></a></span>
+<span id="cb1-33"><a href="#cb1-33"></a><span class="fu">## Slide Deck (PDF)</span></span>
+<span id="cb1-34"><a href="#cb1-34"></a></span>
+<span id="cb1-35"><a href="#cb1-35"></a>&lt;iframe src="data/Final Project Presentation.pdf" width="100%" height="600px" style="border:none;"&gt;&lt;/iframe&gt;</span></code><button title="Copy to Clipboard" class="code-copy-button" data-in-quarto-modal=""><i class="bi"></i></button></pre></div>
 </div></div></div></div></div>
 </div> <!-- /content -->
 <footer class="footer">
