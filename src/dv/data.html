@@ -267,11 +267,16 @@ cookieconsent.run({
 </div>
 </nav><div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
 <!-- margin-sidebar -->
-    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
-        
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active"><h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+<li><a href="#basic-visualizations" id="toc-basic-visualizations" class="nav-link active" data-scroll-target="#basic-visualizations"><span class="header-section-number">8.1</span> Basic Visualizations</a></li>
+  <li><a href="#observations" id="toc-observations" class="nav-link" data-scroll-target="#observations"><span class="header-section-number">8.2</span> Observations</a></li>
+  </ul></nav>
     </div>
 <!-- main -->
-<main class="content column-page-right" id="quarto-document-content"><header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../../src/dv/data.html">Data Visualizations</a></li><li class="breadcrumb-item"><a href="../../src/dv/data.html"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Initial Project Visualizations</span></a></li></ol></nav><div class="quarto-title">
+<main class="content column-body" id="quarto-document-content"><header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../../src/dv/data.html">Data Visualizations</a></li><li class="breadcrumb-item"><a href="../../src/dv/data.html"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Initial Project Visualizations</span></a></li></ol></nav><div class="quarto-title">
 <div class="quarto-title-block"><div><h1 class="title">
 <span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Initial Project Visualizations</span>
 </h1><button type="button" class="btn code-tools-button dropdown-toggle" id="quarto-code-tools-menu" data-bs-toggle="dropdown" aria-expanded="false"><i class="bi"></i> Code</button><ul class="dropdown-menu dropdown-menu-end" aria-labelelledby="quarto-code-tools-menu"><li><a id="quarto-show-all-code" class="dropdown-item" href="javascript:void(0)" role="button">Show All Code</a></li><li><a id="quarto-hide-all-code" class="dropdown-item" href="javascript:void(0)" role="button">Hide All Code</a></li><li><hr class="dropdown-divider"></li><li><a id="quarto-view-source" class="dropdown-item" href="javascript:void(0)" role="button">View Source</a></li></ul></div></div>
@@ -279,7 +284,7 @@ cookieconsent.run({
 
 
 
-<div class="quarto-title-meta column-page-right">
+<div class="quarto-title-meta column-body">
 
     
   
@@ -342,7 +347,8 @@ The following objects are masked from 'package:base':
     max, mean, min, prod, range, sample, sum</code></pre>
 </div>
 </div>
-<p>##Basic Visualizations</p>
+<section id="basic-visualizations" class="level2" data-number="8.1"><h2 data-number="8.1" class="anchored" data-anchor-id="basic-visualizations">
+<span class="header-section-number">8.1</span> Basic Visualizations</h2>
 <p>Exploring attendance across all years</p>
 <div class="cell">
 <details class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1"></a>all_data <span class="ot">&lt;-</span> <span class="fu">read_csv</span>(<span class="st">"../../data/final_data.csv"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -439,7 +445,8 @@ dbl (8): B19013_001E, enrollment, FourYrDrop_Campus, FourYrGrad_Campus, Coll...
 <details class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1"></a><span class="co">#B19013_001E is the median household income</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
-<p>##Observations</p>
+</section><section id="observations" class="level2" data-number="8.2"><h2 data-number="8.2" class="anchored" data-anchor-id="observations">
+<span class="header-section-number">8.2</span> Observations</h2>
 <p>Attendance rates do not vary significantly from year to year. This makes sense, as nothing really happened during the years we’re looking at that would constitute an increase or decrease in attendance.</p>
 <p>2014 sees a drop in College readiness for reading. We are in the midst of researching the potential cause for this drop, but likely it is a signifier of ongoing trends that we are still seeing of decreases in test scores across the nation that signify college readiness. This decrease is just increasing as more social, economic, and political factors affect student ability to prepare well for testing. As national cuts in funding for education continue, we are likely to continue seeing this drop that is present in 2014 in our data.</p>
 <p>Additionally, we plotted the relationship between average household income and college readiness. We can see the general trend that students from on average higher household incomes are more college ready (based on test scores) than students who come from on average lower income areas. Of course, this is just a trend and not predictive of all college readiness. Also important to note that there are more data points between 40000 and 50000, meaning that there are more families from this economic range than higher or lower ranges.</p>
@@ -447,8 +454,7 @@ dbl (8): B19013_001E, enrollment, FourYrDrop_Campus, FourYrGrad_Campus, Coll...
 
 <!-- -->
 
-
-</main><!-- /main --><script id="quarto-html-after-body" type="application/javascript">
+</section></main><!-- /main --><script id="quarto-html-after-body" type="application/javascript">
 window.document.addEventListener("DOMContentLoaded", function (event) {
   const toggleBodyColorMode = (bsSheetEl) => {
     const mode = bsSheetEl.getAttribute("data-mode");
@@ -1067,7 +1073,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
     }
   }
 });
-</script><nav class="page-navigation column-page-right"><div class="nav-page nav-page-previous">
+</script><nav class="page-navigation column-body"><div class="nav-page nav-page-previous">
       <a href="../../src/eda/madeleine-h.html" class="pagination-link" aria-label="Madeleine H">
         <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Madeleine H</span></span>
       </a>          
@@ -1092,7 +1098,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 <span id="cb16-14"><a href="#cb16-14"></a></span>
 <span id="cb16-15"><a href="#cb16-15"></a><span class="in">```</span></span>
 <span id="cb16-16"><a href="#cb16-16"></a></span>
-<span id="cb16-17"><a href="#cb16-17"></a>##Basic Visualizations</span>
+<span id="cb16-17"><a href="#cb16-17"></a><span class="fu">## Basic Visualizations</span></span>
 <span id="cb16-18"><a href="#cb16-18"></a></span>
 <span id="cb16-19"><a href="#cb16-19"></a>Exploring attendance across all years</span>
 <span id="cb16-20"><a href="#cb16-20"></a></span>
@@ -1141,7 +1147,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 <span id="cb16-69"><a href="#cb16-69"></a><span class="co">#B19013_001E is the median household income</span></span>
 <span id="cb16-70"><a href="#cb16-70"></a><span class="in">```</span></span>
 <span id="cb16-71"><a href="#cb16-71"></a></span>
-<span id="cb16-72"><a href="#cb16-72"></a>##Observations</span>
+<span id="cb16-72"><a href="#cb16-72"></a><span class="fu">## Observations</span></span>
 <span id="cb16-73"><a href="#cb16-73"></a></span>
 <span id="cb16-74"><a href="#cb16-74"></a>Attendance rates do not vary significantly from year to year. This makes sense, as nothing really happened during the years we're looking at that would constitute an increase or decrease in attendance. </span>
 <span id="cb16-75"><a href="#cb16-75"></a></span>
