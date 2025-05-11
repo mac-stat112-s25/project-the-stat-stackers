@@ -5,7 +5,7 @@ format: html
 
 [Teamwork is Hard Work — Here's How to Build the Skills to Do It Well](https://www.forbes.com/sites/annkowalsmith/2023/04/25/teamwork-is-hard-work-heres-how-to-build-the-skills-to-do-it-well/)
 
-# Takeaways
+## Takeaways
 
 The most important thing when working in a team, is to listen really well and accept feedback gracefully. The article frames this as listening with humility. I also agree that asking questions is a good way to be an effective team member. 
 

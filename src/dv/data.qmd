@@ -12,7 +12,7 @@ library(mosaic)
 
 ```
 
-##Basic Visualizations
+## Basic Visualizations
 
 Exploring attendance across all years
 
@@ -62,7 +62,7 @@ all_data |>
 #B19013_001E is the median household income
 ```
 
-##Observations
+## Observations
 
 Attendance rates do not vary significantly from year to year. This makes sense, as nothing really happened during the years we're looking at that would constitute an increase or decrease in attendance. 
 

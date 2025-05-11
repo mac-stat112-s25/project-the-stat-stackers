@@ -1,7 +1,7 @@
 ---
 title: "Report"
 execute: 
-  echo: true      # change to true to show the code
+  echo: false      # change to false to hide code chunks
 code-fold: false  # change to true to fold the code chunks
 ---
 
@@ -10,6 +10,14 @@ code-fold: false  # change to true to fold the code chunks
 Our group decided to look at the relationship between median housing income across counties in Texas and educational outcomes. As students, we are all interested in how people are impacted in their educational choices and outcomes based on where they live, average economic trends, and other factors that tend to be outside individual control and signifiers of larger racist and classist structures. We wanted our project to showcase some potential trends and links between average household income and educational outcomes because that analysis is related to larger issues across our country. This project is important because understanding where we are and what the current links between education and income is crucial in crafting any type of policy solution to seeks to solve this issue in the future. 
 
 Median income information is available through census data and educational data is made public by individual school reporting methods. We got our census data in April of 2025 but are using data from the year range of 2010-2019. We acquired our educational data at the beginning of 2025 and adjusted it in April 2025 to fit this project. Texas Education Agency is what schools in Texas report their data to, which is also where we got educational data from. A Texas shapefile was also used to make our maps. Because we used a shapefile, we needed to align our county names with each data set before we could visualize anything. Additionally, we took out counties that were missing educational data from our ten-year time frame, which is why there are some missing counties on our visualizations. 
+
+[Texas Education Agency Data](https://tea.texas.gov/reports-and-data)
+[Texas Enrollment Trends](https://tea.texas.gov/reports-and-data/school-performance/accountability-research/enrollment-trends)
+[Texas Student Data including college readiness data](https://tea.texas.gov/reports-and-data/student-data)
+[Texas Graduation and Dropout Rates](https://tea.texas.gov/reports-and-data/school-performance/accountability-research/completion-graduation-and-dropout)
+All census data was found through R in TidyCensus
+[How to Obtain Census Data in R](https://carolinademography.cpc.unc.edu/2022/05/16/story-recipe-how-to-obtain-census-data-using-r-tidycensus/)
+[Texas Shapefile](https://catalog.data.gov/dataset/tiger-line-shapefile-current-state-texas-block-group)
 
 At the beginning of our project, we included these educational outcomes: graduation rates, college readiness scores, and attendance rates.  We crafted the following guiding research questions:
 
