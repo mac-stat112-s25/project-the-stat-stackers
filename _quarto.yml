@@ -11,8 +11,8 @@ project:
 
 
 book:
-  title: "project title"
-  author: ["student 1 first and last name", "student 2 first and last name", "student 3 first and last name"]
+  title: "The Correlation between Median Housing Income and Educational Outcomes in Texas"
+  author: ["Owen Lindstrom", "Madeleine Heafey", "Rachel Kelly"]
   date: today  # use today to update date published based on last time project was edited
   date-format: full
   # favicon: images/logo.png
@@ -29,7 +29,7 @@ book:
 
 
   sidebar:
-    title: "sidebar title"
+    title: "The Stat Stackers"
     collapse-level: 2
     style: "docked"
     pinned: true
@@ -37,6 +37,23 @@ book:
 
   chapters:
     - index.qmd
+  
+    - part: "Effective Teamwork"
+      chapters:
+      - src/et/rachel-k.qmd
+      - src/et/owen-l.qmd
+      - src/et/madeleine-h.qmd
+      
+    - part: "EDA"
+      chapters:
+      - src/eda/rachel-k.qmd
+      - src/eda/owen-l.qmd
+      - src/eda/madeleine-h.qmd
+      
+    - part: "Data Visualizations"
+      chapters:
+      - src/dv/data.qmd
+      - data/Dataviz.qmd
 
   appendices:
   - src/appx/proposal.qmd
@@ -63,6 +80,7 @@ format:
     code-block-border-left: "#1482FA"
     code-tools: true
     page-layout: full
+    code-fold: true
 
   # pdf:
   #   documentclass: scrreprt

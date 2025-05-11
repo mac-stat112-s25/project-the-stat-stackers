@@ -1,0 +1,1237 @@
+---
+title: "GroupProject"
+author: "Owen Lindstrom"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+##Data Loading/Merging
+
+```{r Libraries, Message = FALSE}
+library(MatchIt)
+library(ggplot2)
+library(sf)
+library(tigris)
+library(dplyr)
+library(purrr)
+library(haven)
+library(ggrepel)
+library(janitor)
+library(Hmisc)
+library(writexl)
+library(stringr)
+library(readxl)
+library(tidyr)
+library(openxlsx)
+library(writexl)
+library(fixest)
+library(car)
+library(modelsummary)
+library(tibble)
+library(gt)
+library(kableExtra)
+library(broom)
+library(officer)
+library(flextable)
+library(plotly)
+library(reticulate)
+library(cobalt)
+library(did)
+library(patchwork)
+library(tidycensus)
+```
+
+```{r Year Merging Lyt Data Function}
+tsa_merge_yearly_data <- function(dta_files, lyt_files, final_name) {
+  # Ensure that the number of .dat and .lyt files match
+  if (length(dta_files) != length(lyt_files)) {
+    stop("The number of .dat files must match the number of .lyt files.")
+  }
+  
+  # Store the merged data
+  merged_data <- NULL
+
+  # Process each .dat and .lyt pair
+  for (i in seq_along(dta_files)) {
+    # Create a temporary name for each dataset
+    temp_name <- paste0("temp_data_", i)
+    
+    # Load the data using the tsa_loading_data function
+    tsa_loading_data(dta_files[i], lyt_files[i], temp_name)
+    
+    # Retrieve the loaded data from the global environment
+    temp_data <- get(temp_name)
+    
+    # If it's the first dataset, initialize merged_data
+    if (is.null(merged_data)) {
+      merged_data <- temp_data
+    } else {
+      # Merge the data by the "CAMPUS" variable using an inner join (all = FALSE)
+      merged_data <- merge(merged_data, temp_data, by = "CAMPUS", all = FALSE)
+      print(paste("Merged data with temp_data", i, "resulting dimensions:", dim(merged_data)))
+    }
+
+    # Remove the temporary data from the global environment
+    rm(list = temp_name, envir = .GlobalEnv)
+  }
+
+  # Assign the final merged dataset to the specified name in the global environment
+  assign(final_name, merged_data, envir = .GlobalEnv)
+  print(paste("Final merged data assigned to", final_name, "with dimensions:", dim(merged_data)))
+  
+  # Return the final merged dataset
+  return(merged_data)
+}
+
+```
+
+```{r 2003-2011 Loading Data Function}
+tsa_loading_data <- function(dta, lyt, Name) {
+  # Read in the .dat file as a CSV without headers
+  data <- read.csv(dta, header = FALSE)
+  print(paste("Loaded data from", dta, "with dimensions:", dim(data)))
+
+  # Check if the first row contains the value "CAMPUS" in any column, ignoring NA values
+  if (any(data[1, ] == "CAMPUS", na.rm = TRUE)) {
+    # If "CAMPUS" is found in the first row, use it as column names
+    colnames(data) <- as.character(data[1, ])
+    data <- data[-1, ]  # Remove the first row as it is now the header
+    print("Using the first row as column names")
+  } else {
+    # Otherwise, proceed with the .lyt file-based labeling
+    labels <- readLines(lyt)
+    labels <- sapply(labels, function(line) {
+      if (grepl("^[0-9]", line)) {
+        strsplit(line, " ")[[1]][2]
+      }
+    })
+    labels <- na.omit(labels)
+    labels <- Filter(Negate(is.null), labels)
+    label_value <- unlist(labels)
+    
+    # Check that the number of labels matches the number of columns in your data
+    if (length(label_value) == ncol(data)) {
+      colnames(data) <- label_value
+    } else {
+      stop("The number of labels does not match the number of columns in the data.")
+    }
+    print("Applied labels from the .lyt file")
+  }
+
+  # Ensure 'CAMPUS' column exists, is of character type, and remove extra spaces
+  if ("CAMPUS" %in% colnames(data)) {
+    data$CAMPUS <- as.character(trimws(data$CAMPUS))
+    data <- data[!is.na(data$CAMPUS), ]  # Remove rows where 'CAMPUS' is NA
+    print("Processed CAMPUS column")
+  } else {
+    stop(paste("CAMPUS column not found in data from:", dta))
+  }
+
+  print(paste("Processed data for", Name, "with dimensions:", dim(data)))
+  print(head(data))
+
+  # Assign the data frame to a variable with the specified name in the global environment
+  assign(Name, data, envir = .GlobalEnv)
+}
+
+```
+
+```{r 2012-2013 Data Loading Function}
+# Define the function
+load_and_merge_text_files <- function(file_paths, merge_name = "merged_data") {
+  
+  # Initialize an empty list to store each data frame
+  data_list <- list()
+  
+  # Loop through each file path
+  for (i in seq_along(file_paths)) {
+    # Read the data from the text file
+    data <- read.csv(file_paths[i], sep = ",", header = TRUE, quote = "\"", stringsAsFactors = FALSE, fill = TRUE)
+    
+    # Clean up column names
+    colnames(data) <- trimws(colnames(data))
+    
+    # Ensure CAMPUS column is character for consistent merging
+    data <- data %>%
+      mutate(CAMPUS = as.character(CAMPUS))
+    
+    # Add this data frame to the list
+    data_list[[i]] <- data
+  }
+  
+  # Merge all data frames in the list by the CAMPUS identifier
+  merged_data <- Reduce(function(x, y) merge(x, y, by = "CAMPUS", all = TRUE), data_list)
+  
+  # Assign the merged data to the specified name in the global environment
+  assign(merge_name, merged_data, envir = .GlobalEnv)
+  
+  # Return the merged data
+  return(merged_data)
+}
+```
+
+```{r 2013-2020 Loading Data Function}
+tsa_merge_labeled_data <- function(dta_files, final_name) {
+  # Store the merged data
+  merged_data <- NULL
+
+  # Process each .dta file
+  for (i in seq_along(dta_files)) {
+    # Create a temporary name for each dataset
+    temp_name <- paste0("temp_data_", i)
+    
+    # Read in the .dta file as a CSV without header adjustments
+    print(paste("Reading data from:", dta_files[i]))
+    data <- read.csv(dta_files[i], header = TRUE)
+    print(paste("Loaded data with dimensions:", dim(data)))
+    
+    # Ensure 'CAMPUS' column exists, is of character type, and remove extra spaces
+    if ("CAMPUS" %in% colnames(data)) {
+      data$CAMPUS <- as.character(trimws(data$CAMPUS))
+      data <- data[!is.na(data$CAMPUS), ]  # Remove rows where 'CAMPUS' is NA
+    } else {
+      stop(paste("CAMPUS column not found in data from:", dta_files[i]))
+    }
+
+    # If it's the first dataset, initialize merged_data
+    if (is.null(merged_data)) {
+      merged_data <- data
+    } else {
+      # Merge the data by the "CAMPUS" variable using an inner join (all = FALSE)
+      merged_data <- merge(merged_data, data, by = "CAMPUS", all = FALSE)
+      print(paste("Merged data with dataset", i, "resulting dimensions:", dim(merged_data)))
+    }
+  }
+
+  # Assign the final merged dataset to the specified name in the global environment
+  assign(final_name, merged_data, envir = .GlobalEnv)
+  print(paste("Final merged data assigned to", final_name, "with dimensions:", dim(merged_data)))
+  
+  # Return the final merged dataset
+  return(merged_data)
+}
+```
+
+```{r 2020-2021 Function}
+tsa_merge_labeled_csv_data <- function(csv_files, final_name) {
+  # Store the merged data
+  merged_data <- NULL
+
+  # Process each .csv file
+  for (i in seq_along(csv_files)) {
+    # Read the CSV
+    message("Reading CSV file: ", csv_files[i])
+    data <- read.csv(csv_files[i], header = TRUE, stringsAsFactors = FALSE)
+    message("Loaded data with dimensions: ", paste(dim(data), collapse = " x "))
+    
+    # Ensure 'CAMPUS' column exists, is character, and remove extra spaces
+    if ("CAMPUS" %in% colnames(data)) {
+      data$CAMPUS <- as.character(trimws(data$CAMPUS))
+      data <- data[!is.na(data$CAMPUS), ]  # remove rows with NA CAMPUS
+    } else {
+      stop("CAMPUS column not found in: ", csv_files[i])
+    }
+    
+    # If it's the first dataset, initialize merged_data
+    if (is.null(merged_data)) {
+      merged_data <- data
+    } else {
+      # Merge by CAMPUS (inner join style, i.e., all=FALSE)
+      merged_data <- merge(merged_data, data, by = "CAMPUS", all = FALSE)
+      message("After merging with file ", i, " => dimensions: ", 
+              paste(dim(merged_data), collapse = " x "))
+    }
+  }
+  
+  # Assign the final merged dataset to the specified name in the global environment
+  assign(final_name, merged_data, envir = .GlobalEnv)
+  message("Final merged data assigned to '", final_name, 
+          "' with dimensions: ", paste(dim(merged_data), collapse = " x "))
+
+  # Return it as well
+  return(merged_data)
+}
+```
+
+```{r All Vectors}
+dat03 = c("~/Documents/2024/Fall Semester/Honors/Data/TEA Source Data/03-04 COLLEGE:LONG.dat", "/Users/owenlindstrom/Documents/2024/Fall Semester/Honors/Data/TEA Source Data/03-04 GRAD.dat", "/Users/owenlindstrom/Documents/2024/Fall Semester/Honors/Data/TEA Source Data/03-04 PROF.dat", "/Users/owenlindstrom/Documents/2024/Fall Semester/Honors/Data/TEA Source Data/03-04 PROFSTAFF.dat", "/Users/owenlindstrom/Documents/2024/Fall Semester/Honors/Data/TEA Source Data/03-04 REF.dat", "/Users/owenlindstrom/Documents/2024/Fall Semester/Honors/Data/TEA Source Data/03-04 TSI.dat")
+lyt03 = c("~/Downloads/ccadcomp.lyt", "/Users/owenlindstrom/Documents/2024/Fall Semester/Honors/Data/TEA Source Data/03-04 GRAD.lyt", "/Users/owenlindstrom/Documents/2024/Fall Semester/Honors/Data/TEA Source Data/03-04 PROF.lyt", "/Users/owenlindstrom/Documents/2024/Fall Semester/Honors/Data/TEA Source Data/03-04 PROFSTAFF.lyt", "/Users/owenlindstrom/Documents/2024/Fall Semester/Honors/Data/TEA Source Data/03-04 REF.lyt", "/Users/owenlindstrom/Documents/2024/Fall Semester/Honors/Data/TEA Source Data/03-04 TSI.lyt")
+dat04 = c("/Users/owenlindstrom/Documents/2024/Fall Semester/Honors/Data/TEA Source Data/04-05 COLLEGE:LONG.dat","/Users/owenlindstrom/Documents/2024/Fall Semester/Honors/Data/TEA Source Data/04-05 GRAD.dat", "/Users/owenlindstrom/Documents/2024/Fall Semester/Honors/Data/TEA Source Data/04-05 PROF.dat", "/Users/owenlindstrom/Documents/2024/Fall Semester/Honors/Data/TEA Source Data/04-05 PROFSTAFF.dat", "/Users/owenlindstrom/Documents/2024/Fall Semester/Honors/Data/TEA Source Data/04-05 REF.dat", "/Users/owenlindstrom/Documents/2024/Fall Semester/Honors/Data/TEA Source Data/04-05 TSI.dat")
+lyt04 = c("/Users/owenlindstrom/Documents/2024/Fall Semester/Honors/Data/TEA Source Data/04-05 COLLEGE:LONG.lyt","/Users/owenlindstrom/Documents/2024/Fall Semester/Honors/Data/TEA Source Data/04-05 GRAD.lyt", "/Users/owenlindstrom/Documents/2024/Fall Semester/Honors/Data/TEA Source Data/04-05 PROF.lyt", "/Users/owenlindstrom/Documents/2024/Fall Semester/Honors/Data/TEA Source Data/04-05 PROFSTAFF.lyt", "/Users/owenlindstrom/Documents/2024/Fall Semester/Honors/Data/TEA Source Data/04-05 REF.lyt", "/Users/owenlindstrom/Documents/2024/Fall Semester/Honors/Data/TEA Source Data/04-05 TSI.lyt")
+dat05 = c("/Users/owenlindstrom/Documents/2024/Fall Semester/Honors/Data/TEA Source Data/05-06 GRAD.dat","/Users/owenlindstrom/Documents/2024/Fall Semester/Honors/Data/TEA Source Data/05-06 LONG:COLLEGE.dat","/Users/owenlindstrom/Documents/2024/Fall Semester/Honors/Data/TEA Source Data/05-06 PROF.dat","/Users/owenlindstrom/Documents/2024/Fall Semester/Honors/Data/TEA Source Data/05-06 PROFSTAFF.dat","/Users/owenlindstrom/Documents/2024/Fall Semester/Honors/Data/TEA Source Data/05-06 REF.dat","/Users/owenlindstrom/Documents/2024/Fall Semester/Honors/Data/TEA Source Data/05-06 TSI.dat")
+lyt05 = c("/Users/owenlindstrom/Documents/2024/Fall Semester/Honors/Data/TEA Source Data/05-06 GRAD.lyt","/Users/owenlindstrom/Documents/2024/Fall Semester/Honors/Data/TEA Source Data/05-06 LONG:COLLEGE.lyt","/Users/owenlindstrom/Documents/2024/Fall Semester/Honors/Data/TEA Source Data/05-06 PROF.lyt","/Users/owenlindstrom/Documents/2024/Fall Semester/Honors/Data/TEA Source Data/05-06 PROFSTAFF.lyt","/Users/owenlindstrom/Documents/2024/Fall Semester/Honors/Data/TEA Source Data/05-06 REF.lyt","/Users/owenlindstrom/Documents/2024/Fall Semester/Honors/Data/TEA Source Data/05-06 TSI.lyt")
+dat06 = c("/Users/owenlindstrom/Documents/2024/Fall Semester/Honors/Data/TEA Source Data/06-07 COLLEGEREADY.dat","/Users/owenlindstrom/Documents/2024/Fall Semester/Honors/Data/TEA Source Data/06-07 GRAD.dat","/Users/owenlindstrom/Documents/2024/Fall Semester/Honors/Data/TEA Source Data/06-07 LONG.dat","/Users/owenlindstrom/Documents/2024/Fall Semester/Honors/Data/TEA Source Data/06-07 PROF.dat","/Users/owenlindstrom/Documents/2024/Fall Semester/Honors/Data/TEA Source Data/06-07 PROFSTAFF.dat","/Users/owenlindstrom/Documents/2024/Fall Semester/Honors/Data/TEA Source Data/06-07 REF.dat","/Users/owenlindstrom/Documents/2024/Fall Semester/Honors/Data/TEA Source Data/06-07 TSI.dat")
+lyt06 = c("/Users/owenlindstrom/Documents/2024/Fall Semester/Honors/Data/TEA Source Data/06-07 COLLEGEREADY.lyt",
+"/Users/owenlindstrom/Documents/2024/Fall Semester/Honors/Data/TEA Source Data/06-07 GRAD.lyt",
+"/Users/owenlindstrom/Documents/2024/Fall Semester/Honors/Data/TEA Source Data/06-07 LONG.lyt",
+"/Users/owenlindstrom/Documents/2024/Fall Semester/Honors/Data/TEA Source Data/06-07 PROF.lyt",
+"/Users/owenlindstrom/Documents/2024/Fall Semester/Honors/Data/TEA Source Data/06-07 PROFSTAFF.lyt",
+"/Users/owenlindstrom/Documents/2024/Fall Semester/Honors/Data/TEA Source Data/06-07 REF.lyt",
+"/Users/owenlindstrom/Documents/2024/Fall Semester/Honors/Data/TEA Source Data/06-07 TSI.lyt")
+dat07 = c("/Users/owenlindstrom/Documents/2024/Fall Semester/Honors/Data/TEA Source Data/07-08 COLLEGEREADY.dat","/Users/owenlindstrom/Documents/2024/Fall Semester/Honors/Data/TEA Source Data/07-08 GRAD.dat","/Users/owenlindstrom/Documents/2024/Fall Semester/Honors/Data/TEA Source Data/07-08 LONG.dat","/Users/owenlindstrom/Documents/2024/Fall Semester/Honors/Data/TEA Source Data/07-08 PROF.dat","/Users/owenlindstrom/Documents/2024/Fall Semester/Honors/Data/TEA Source Data/07-08 PROFSTAFF.dat","/Users/owenlindstrom/Documents/2024/Fall Semester/Honors/Data/TEA Source Data/07-08 REF.dat","/Users/owenlindstrom/Documents/2024/Fall Semester/Honors/Data/TEA Source Data/07-08 TSI.dat")
+lyt07 = c("/Users/owenlindstrom/Documents/2024/Fall Semester/Honors/Data/TEA Source Data/07-08 COLLEGEREADY.lyt", "/Users/owenlindstrom/Documents/2024/Fall Semester/Honors/Data/TEA Source Data/07-08 GRAD.lyt","/Users/owenlindstrom/Documents/2024/Fall Semester/Honors/Data/TEA Source Data/07-08 LONG.lyt","/Users/owenlindstrom/Documents/2024/Fall Semester/Honors/Data/TEA Source Data/07-08 PROF.lyt","/Users/owenlindstrom/Documents/2024/Fall Semester/Honors/Data/TEA Source Data/07-08 PROFSTAFF.lyt","/Users/owenlindstrom/Documents/2024/Fall Semester/Honors/Data/TEA Source Data/07-08 REF.lyt","/Users/owenlindstrom/Documents/2024/Fall Semester/Honors/Data/TEA Source Data/07-08 TSI.lyt")
+dat08 = c("/Users/owenlindstrom/Documents/2024/Fall Semester/Honors/Data/TEA Source Data/08-09 COLLEGEREADY.dat","/Users/owenlindstrom/Documents/2024/Fall Semester/Honors/Data/TEA Source Data/08-09 GRAD.dat","/Users/owenlindstrom/Documents/2024/Fall Semester/Honors/Data/TEA Source Data/08-09 LONG.dat","/Users/owenlindstrom/Documents/2024/Fall Semester/Honors/Data/TEA Source Data/08-09 PROF.dat","/Users/owenlindstrom/Documents/2024/Fall Semester/Honors/Data/TEA Source Data/08-09 PROFSTAFF.dat","/Users/owenlindstrom/Documents/2024/Fall Semester/Honors/Data/TEA Source Data/08-09 REF.dat","/Users/owenlindstrom/Documents/2024/Fall Semester/Honors/Data/TEA Source Data/08-09 TSI.dat")
+lyt08 = c("/Users/owenlindstrom/Documents/2024/Fall Semester/Honors/Data/TEA Source Data/08-09 COLLEGEREADY.lyt","/Users/owenlindstrom/Documents/2024/Fall Semester/Honors/Data/TEA Source Data/08-09 GRAD.lyt","/Users/owenlindstrom/Documents/2024/Fall Semester/Honors/Data/TEA Source Data/08-09 LONG.lyt","/Users/owenlindstrom/Documents/2024/Fall Semester/Honors/Data/TEA Source Data/08-09 PROF.lyt","/Users/owenlindstrom/Documents/2024/Fall Semester/Honors/Data/TEA Source Data/08-09 PROFSTAFF.lyt","/Users/owenlindstrom/Documents/2024/Fall Semester/Honors/Data/TEA Source Data/08-09 REF.lyt","/Users/owenlindstrom/Documents/2024/Fall Semester/Honors/Data/TEA Source Data/08-09 TSI.lyt")
+dat09 = c("/Users/owenlindstrom/Documents/2024/Fall Semester/Honors/Data/TEA Source Data/09-10 COLLEGEREADY.dat","/Users/owenlindstrom/Documents/2024/Fall Semester/Honors/Data/TEA Source Data/09-10 GRAD.dat","/Users/owenlindstrom/Documents/2024/Fall Semester/Honors/Data/TEA Source Data/09-10 LONG.dat","/Users/owenlindstrom/Documents/2024/Fall Semester/Honors/Data/TEA Source Data/09-10 PROF.dat","/Users/owenlindstrom/Documents/2024/Fall Semester/Honors/Data/TEA Source Data/09-10 PROFSTAFF.dat","/Users/owenlindstrom/Documents/2024/Fall Semester/Honors/Data/TEA Source Data/09-10 REF.dat","/Users/owenlindstrom/Documents/2024/Fall Semester/Honors/Data/TEA Source Data/09-10 TSI.dat")
+lyt09 = c("/Users/owenlindstrom/Documents/2024/Fall Semester/Honors/Data/TEA Source Data/09-10 COLLEGEREADY.lyt","/Users/owenlindstrom/Documents/2024/Fall Semester/Honors/Data/TEA Source Data/09-10 GRAD.lyt","/Users/owenlindstrom/Documents/2024/Fall Semester/Honors/Data/TEA Source Data/09-10 LONG.lyt","/Users/owenlindstrom/Documents/2024/Fall Semester/Honors/Data/TEA Source Data/09-10 PROF.lyt","/Users/owenlindstrom/Documents/2024/Fall Semester/Honors/Data/TEA Source Data/09-10 PROFSTAFF.lyt","/Users/owenlindstrom/Documents/2024/Fall Semester/Honors/Data/TEA Source Data/09-10 REF.lyt","/Users/owenlindstrom/Documents/2024/Fall Semester/Honors/Data/TEA Source Data/09-10 TSI.lyt")
+dat10 = c("/Users/owenlindstrom/Documents/2024/Fall Semester/Honors/Data/TEA Source Data/10-11 COLLEGEREADY.dat","/Users/owenlindstrom/Documents/2024/Fall Semester/Honors/Data/TEA Source Data/10-11 COMPLETION.dat","/Users/owenlindstrom/Documents/2024/Fall Semester/Honors/Data/TEA Source Data/10-11 GRAD.dat","/Users/owenlindstrom/Documents/2024/Fall Semester/Honors/Data/TEA Source Data/10-11 PROF.dat","/Users/owenlindstrom/Documents/2024/Fall Semester/Honors/Data/TEA Source Data/10-11 PROFSTAFF.dat","/Users/owenlindstrom/Documents/2024/Fall Semester/Honors/Data/TEA Source Data/10-11 REF.dat","/Users/owenlindstrom/Documents/2024/Fall Semester/Honors/Data/TEA Source Data/10-11 TSI.dat")
+lyt10 = c("/Users/owenlindstrom/Documents/2024/Fall Semester/Honors/Data/TEA Source Data/10-11 COLLEGEREADY.lyt","/Users/owenlindstrom/Documents/2024/Fall Semester/Honors/Data/TEA Source Data/10-11 COMPLETION.lyt","/Users/owenlindstrom/Documents/2024/Fall Semester/Honors/Data/TEA Source Data/10-11 GRAD.lyt","/Users/owenlindstrom/Documents/2024/Fall Semester/Honors/Data/TEA Source Data/10-11 PROF.lyt","/Users/owenlindstrom/Documents/2024/Fall Semester/Honors/Data/TEA Source Data/10-11 PROFSTAFF.lyt","/Users/owenlindstrom/Documents/2024/Fall Semester/Honors/Data/TEA Source Data/10-11 REF.lyt","/Users/owenlindstrom/Documents/2024/Fall Semester/Honors/Data/TEA Source Data/10-11 TSI.lyt")
+dat11 = c("/Users/owenlindstrom/Documents/2024/Fall Semester/Honors/Data/TEA Source Data/11-12 GRAD.dat","/Users/owenlindstrom/Documents/2024/Fall Semester/Honors/Data/TEA Source Data/11-12 GRAD2.dat","/Users/owenlindstrom/Documents/2024/Fall Semester/Honors/Data/TEA Source Data/11-12 LONG.dat","/Users/owenlindstrom/Documents/2024/Fall Semester/Honors/Data/TEA Source Data/11-12 PROF.dat","/Users/owenlindstrom/Documents/2024/Fall Semester/Honors/Data/TEA Source Data/11-12 PROFSTAFF.dat","/Users/owenlindstrom/Documents/2024/Fall Semester/Honors/Data/TEA Source Data/11-12 REF.dat","/Users/owenlindstrom/Documents/2024/Fall Semester/Honors/Data/TEA Source Data/11-12 TSI.dat")
+dat13 = c("/Users/owenlindstrom/Documents/2024/Fall Semester/Honors/Data/TEA Source Data/13-14 GRAD.dat","/Users/owenlindstrom/Documents/2024/Fall Semester/Honors/Data/TEA Source Data/13-14 LONG.dat","/Users/owenlindstrom/Documents/2024/Fall Semester/Honors/Data/TEA Source Data/13-14 REF.dat")
+dat14 = c("/Users/owenlindstrom/Documents/2024/Fall Semester/Honors/Data/TEA Source Data/14-15 GRAD.dat","/Users/owenlindstrom/Documents/2024/Fall Semester/Honors/Data/TEA Source Data/14-15 LONG.dat","/Users/owenlindstrom/Documents/2024/Fall Semester/Honors/Data/TEA Source Data/14-15 PROF.dat","/Users/owenlindstrom/Documents/2024/Fall Semester/Honors/Data/TEA Source Data/14-15 REF.dat")
+dat15 = c("/Users/owenlindstrom/Documents/2024/Fall Semester/Honors/Data/TEA Source Data/15-16 GRAD.dat","/Users/owenlindstrom/Documents/2024/Fall Semester/Honors/Data/TEA Source Data/15-16 LONG.dat","/Users/owenlindstrom/Documents/2024/Fall Semester/Honors/Data/TEA Source Data/15-16 PROF.dat","/Users/owenlindstrom/Documents/2024/Fall Semester/Honors/Data/TEA Source Data/15-16 REF.dat")
+dat16 = c("/Users/owenlindstrom/Documents/2024/Fall Semester/Honors/Data/TEA Source Data/16-17 GRAD.dat","/Users/owenlindstrom/Documents/2024/Fall Semester/Honors/Data/TEA Source Data/16-17 LONG.dat","/Users/owenlindstrom/Documents/2024/Fall Semester/Honors/Data/TEA Source Data/16-17 PROF.dat","/Users/owenlindstrom/Documents/2024/Fall Semester/Honors/Data/TEA Source Data/16-17 REF.dat")
+dat17 = c("/Users/owenlindstrom/Documents/2024/Fall Semester/Honors/Data/TEA Source Data/17-18 COLLEGEREADY.dat","/Users/owenlindstrom/Documents/2024/Fall Semester/Honors/Data/TEA Source Data/17-18 GRAD.dat","/Users/owenlindstrom/Documents/2024/Fall Semester/Honors/Data/TEA Source Data/17-18 LONG.dat","/Users/owenlindstrom/Documents/2024/Fall Semester/Honors/Data/TEA Source Data/17-18 PROF.dat","/Users/owenlindstrom/Documents/2024/Fall Semester/Honors/Data/TEA Source Data/17-18 REF.dat")
+dat18 = c("/Users/owenlindstrom/Documents/2024/Fall Semester/Honors/Data/TEA Source Data/18-19 COLLEGEREADY.dat","/Users/owenlindstrom/Documents/2024/Fall Semester/Honors/Data/TEA Source Data/18-19 GRAD.dat","/Users/owenlindstrom/Documents/2024/Fall Semester/Honors/Data/TEA Source Data/18-19 LONG.dat","/Users/owenlindstrom/Documents/2024/Fall Semester/Honors/Data/TEA Source Data/18-19 PROF.dat","/Users/owenlindstrom/Documents/2024/Fall Semester/Honors/Data/TEA Source Data/18-19 REF.dat")
+dat19 = c("/Users/owenlindstrom/Documents/2024/Fall Semester/Honors/Data/TEA Source Data/19-20 COLLEGEREADY.dat","/Users/owenlindstrom/Documents/2024/Fall Semester/Honors/Data/TEA Source Data/19-20 GRAD.dat","/Users/owenlindstrom/Documents/2024/Fall Semester/Honors/Data/TEA Source Data/19-20 LONG.dat","/Users/owenlindstrom/Documents/2024/Fall Semester/Honors/Data/TEA Source Data/19-20 PROF.dat")
+dat20 <- c("/Users/owenlindstrom/Documents/2024/Fall Semester/Honors/Data/TEA Source Data/20-21 AP:IB:ACT:SAT.csv",
+  "/Users/owenlindstrom/Documents/2024/Fall Semester/Honors/Data/TEA Source Data/20-21 COLLEGEREADY.csv",
+  "/Users/owenlindstrom/Documents/2024/Fall Semester/Honors/Data/TEA Source Data/20-21 GRAD.csv",
+  "/Users/owenlindstrom/Documents/2024/Fall Semester/Honors/Data/TEA Source Data/20-21 LONG.csv",
+  "/Users/owenlindstrom/Documents/2024/Fall Semester/Honors/Data/TEA Source Data/20-21 PROF.csv",
+  "/Users/owenlindstrom/Documents/2024/Fall Semester/Honors/Data/TEA Source Data/20-21 REF.csv")
+dat12 <- c("/Users/owenlindstrom/Documents/2024/Fall Semester/Honors/Data/TEA Source Data/12-13 GRAD.txt","/Users/owenlindstrom/Documents/2024/Fall Semester/Honors/Data/TEA Source Data/12-13 PROF.txt","/Users/owenlindstrom/Documents/2024/Fall Semester/Honors/Data/TEA Source Data/12-13 REF.txt")
+```
+
+```{r Yearly Data Merging}
+tsa_merge_yearly_data(dat03,lyt03,"Data03")
+tsa_merge_yearly_data(dat04,lyt04,"Data04")
+tsa_merge_yearly_data(dat05,lyt05,"Data05")
+tsa_merge_yearly_data(dat06,lyt06,"Data06")
+tsa_merge_yearly_data(dat07,lyt07,"Data07")
+tsa_merge_yearly_data(dat08,lyt08,"Data08")
+tsa_merge_yearly_data(dat09,lyt09,"Data09")
+tsa_merge_yearly_data(dat10,lyt10,"Data10")
+tsa_merge_labeled_data(dat11, "Data11")
+tsa_merge_labeled_data(dat13, "Data13")
+tsa_merge_labeled_data(dat14, "Data14")
+tsa_merge_labeled_data(dat15, "Data15")
+tsa_merge_labeled_data(dat16, "Data16")
+tsa_merge_labeled_data(dat17, "Data17")
+tsa_merge_labeled_data(dat18, "Data18")
+tsa_merge_labeled_data(dat19, "Data19")
+load_and_merge_text_files(dat12,"Data12")
+tsa_merge_labeled_csv_data(dat20, "Data20")
+```
+
+```{r 2020-2021 School Year Data Leading Zero Fix}
+# Or using stringr:
+library(stringr)
+Data20$CAMPUS <- str_remove(Data20$CAMPUS, "^'")
+```
+
+```{r 2005 Additional Variables}
+library(dplyr)
+library(stringr)
+
+Add05 <- read.csv("/Users/owenlindstrom/Downloads/completion_campus_2005.csv")
+Add05 <- Add05 %>%
+  select(CAMPUS, CAMP_ALLR_GRAD, CAMP_ALLR_DROP, CAMP_ECNR_GRAD, CAMP_ECNR_DROP)
+
+Data05 <- Data05 %>%
+  mutate(
+    CAMPUS_ORIG = CAMPUS,                     # Keep original with leading zeros
+    CAMPUS_wo0  = str_replace(CAMPUS, "^0+", "")  # Strip leading zeros
+  )
+
+# 2) Ensure Add05 has a matching 'CAMPUS_wo0' column for the merge
+#    If Add05 has strictly numeric or no leading zeros, you can just convert to string:
+Add05 <- Add05 %>%
+  mutate(CAMPUS_wo0 = as.character(CAMPUS),
+        CADC405R = CAMP_ALLR_DROP,
+        CEDC405R = CAMP_ECNR_DROP,
+        CAGC405R = CAMP_ALLR_GRAD,
+        CEGC405R = CAMP_ECNR_GRAD
+         ) 
+
+# 3) Perform a LEFT JOIN on the stripped version
+Data05 <- Data05 %>%
+  left_join(Add05, by = "CAMPUS_wo0")
+
+# 4) (Optional) If you want to *keep* using the original zero-padded codes:
+#    Rename CAMPUS_ORIG back to CAMPUS, drop the stripped columns if you’d like:
+Data05 <- Data05 %>%
+  mutate(CAMPUS = CAMPUS_ORIG) %>%
+  select(-CAMPUS_wo0, -CAMPUS_ORIG)
+
+# 5) (Optional) Arrange if desired—e.g., by the stripped version or by CAMPUS
+#    If you just want to arrange by the stripped version before dropping columns:
+# Merged05 <- Merged05 %>%
+#   arrange(CAMPUS_wo0)
+
+```
+
+```{r 2019 Year Fix}
+library(dplyr)
+
+Data19 <- Data19 %>%
+  left_join(
+    Data18 %>%
+      select(CAMPUS, GRDTYPE, GRDSPAN),
+    by = "CAMPUS"
+  )
+
+```
+
+```{r Merging all Years and Cleaning Year by Year Variables}
+# Define a list of datasets and their corresponding years
+datasets <- list(
+  "Data03" = 2003,
+  "Data04" = 2004,
+  "Data05" = 2005,
+  "Data06" = 2006,
+  "Data07" = 2007,
+  "Data08" = 2008,
+  "Data09" = 2009,
+  "Data10" = 2010,
+  "Data11" = 2011,
+  "Data12" = 2012,
+  "Data13" = 2013,
+  "Data14" = 2014,
+  "Data15" = 2015,
+  "Data16" = 2016,
+  "Data17" = 2017,
+  "Data18" = 2018,
+  "Data19" = 2019,
+  "Data20" = 2020
+)
+
+# List of variables of interest, including the newly added year-specific ones
+year_specific_vars <- c(
+  "CATSIR04R", "CETSIR04R", "CATSIM04R", "CETSIM04R",
+  "CA0AT02R", "CE0AT02R", "CA0AT03R", "C30AT03R",
+  "CANC402R", "CENC402R", "CANC403R", "CENC403R",
+  "CADC402R", "CADC403R", "CEDC402R", "CEDC403R",
+  "CA0GR03N",
+  "CACRR17R", "CECRR17R", "CACRB17R", "CACRE17R"
+)
+
+# Regex pattern to identify and standardize year-specific variables
+year_specific_pattern <- "([0-9]{2})(?=[A-Za-z]$)"
+
+# List of variables that are consistent across all years
+consistent_vars <- c(
+  "CAMPNAME", "CAMPUS", "C_RATING", "CFLCHART", "CNTYNAME", "COUNTY",
+  "GRDSPAN", "GRDTYPE", "PAIRCAMP", "PAIRNAME", "CPEMALLP",
+  "CPETECOC", "CPETECOP", "CPETG09C", "CPETG10C", "CPETG11C",
+  "CPETG12C", "CPETG09P", "CPETG10P", "CPETG11P", "CPETG12P"
+)
+
+# Function to standardize variable names and ensure consistent data types
+standardize_and_clean_data <- function(data, year) {
+  # Standardize variable names for year-specific variables
+  colnames(data) <- gsub(year_specific_pattern, "XX", colnames(data), perl = TRUE)
+  
+  # Select the standardized year-specific variables and consistent variables
+  selected_vars <- c(year_specific_vars, consistent_vars)
+  selected_vars <- unique(gsub(year_specific_pattern, "XX", selected_vars, perl = TRUE))
+  
+  # Get the variables that are present in the current dataset
+  existing_vars <- intersect(selected_vars, colnames(data))
+  
+  # Filter the data to include only the variables of interest that exist in the dataset
+  data <- data %>% select(any_of(existing_vars))
+  
+  # Separate handling for numeric and text variables
+  numeric_vars <- intersect(year_specific_vars, colnames(data))
+  text_vars <- intersect(consistent_vars, colnames(data))
+  
+  # Ensure `CA0GRXXN` and `CPETGXXC` are always treated as character
+  if ("CA0GRXXN" %in% colnames(data)) {
+    data <- data %>% mutate(CA0GRXXN = as.character(CA0GRXXN))
+  }
+  if ("CPETGXXC" %in% colnames(data)) {
+    data <- data %>% mutate(CPETGXXC = as.character(CPETGXXC))
+  }
+  if ("CPETGXXP" %in% colnames(data)) {
+    data <- data %>% mutate(CPETGXXP = as.character(CPETGXXC))
+  }
+  
+  # Convert numeric variables to numeric, preserving text variables as character
+  data <- data %>%
+    mutate(across(all_of(numeric_vars), ~ suppressWarnings(as.numeric(as.character(.))))) %>%
+    mutate(across(all_of(text_vars), as.character))
+  
+  # Add the Year column as character for consistency
+  data$Year <- as.character(year)
+  
+  return(data)
+}
+
+# Process each dataset, standardize, and store in a list
+standardized_datasets <- lapply(names(datasets), function(name) {
+  year <- datasets[[name]]
+  data <- get(name)  # Retrieve the dataset from the environment
+  standardize_and_clean_data(data, year)
+})
+
+# Combine all datasets into a single data frame
+raw_data <- bind_rows(standardized_datasets)
+```
+
+```{r Leading 0s Fix}
+raw_data$CAMPUS <- str_replace(raw_data$CAMPUS, "^0+", "")
+```
+
+```{r Final Dataset First Pass with Education Data}
+first_filters_data <- raw_data %>%
+  filter(GRDSPAN == "09 - 12")
+```
+
+```{r New Variable CAMPUS ID New Variable Leading 0s Fix}
+first_filters_data <- first_filters_data %>%
+  mutate(CAMPUS_wo0 = str_replace(CAMPUS, "^0+","")) %>%
+  arrange(CAMPUS_wo0)
+```
+
+```{r Data column reorder}
+first_filters_data <- first_filters_data %>%
+  arrange(CAMPNAME) %>%
+  select(CAMPNAME, CAMPUS_wo0, Year, everything())
+```
+
+```{r Creating a complete Panel Dataset}
+complete_data <- first_filters_data %>%
+  mutate(Year = as.integer(Year))
+# Identify the full range of years in the dataset
+all_years <- seq(min(complete_data$Year), max(complete_data$Year))
+
+# Generate all combinations of CAMPUS_wo0 and Year for a complete panel
+complete_panel <- expand_grid(
+  CAMPUS_wo0 = unique(complete_data$CAMPUS_wo0),
+  Year = all_years
+)
+
+# Merge this complete panel with the existing data to add rows for missing years
+# Using left join to keep all CAMPUS_wo0-Year combinations in complete_panel
+panel_data <- complete_panel %>%
+  left_join(complete_data, by = c("CAMPUS_wo0", "Year")) %>%
+  mutate(Fill = ifelse(is.na(CAMPNAME), 1, 0))
+
+# Fill in static information for the missing years
+# Use fill to carry forward non-changing information for each CAMPUS_wo0
+panel_data <- panel_data %>%
+  group_by(CAMPUS_wo0) %>%
+  arrange(CAMPUS_wo0) %>%
+  fill(CAMPNAME, GRDTYPE, COUNTY, CFLCHART, C_RATING, GRDSPAN, .direction = "downup") %>%
+  ungroup()
+```
+
+```{r Create barebones Panel Dataset with only Campus Information}
+panel_data_bare <- panel_data %>%
+  select(CAMPUS_wo0, Year, CAMPNAME, GRDTYPE, GRDSPAN, C_RATING, PAIRCAMP, PAIRNAME, CNTYNAME, COUNTY, Fill)
+```
+
+```{r School Shooting Data Load}
+school_shooting_data <- read_excel("/Users/owenlindstrom/Documents/2024/Fall Semester/Honors/Data/Shooting Data/Shooting Merge Data.xlsx")
+school_shooting_data$CAMPUS <- stringr::str_replace(school_shooting_data$CAMPUS, "^0+", "")
+school_shooting_data$Year <- as.numeric(school_shooting_data$Year)
+```
+
+```{r School Shooting Data Merge and New Variable}
+# Ensure CAMPUS_wo0 and Year are consistent in both datasets
+panel_data_bare <- panel_data_bare %>%
+  mutate(
+    CAMPUS_wo0 = as.character(CAMPUS_wo0),
+    Year = as.character(Year)
+  )
+
+school_shooting_data <- school_shooting_data %>%
+  mutate(
+    CAMPUS = as.character(CAMPUS),
+    Year = as.character(Year),
+    Shooting = 1  # Create Shooting column explicitly
+  )
+
+# Perform the left join to add the Shooting variable
+panel_data_bare <- panel_data_bare %>%
+  left_join(
+    school_shooting_data %>% select(CAMPUS, Year, Shooting),
+    by = c("CAMPUS_wo0" = "CAMPUS", "Year" = "Year")
+  )
+
+# Replace NA values in Shooting column with 0
+panel_data_bare <- panel_data_bare %>%
+  mutate(Shooting = replace_na(Shooting, 0))
+```
+
+```{r Attendance Data Load 2}
+# Define datasets and years
+datasets <- list(
+  "Data03" = 2003,
+  "Data04" = 2004,
+  "Data05" = 2005,
+  "Data06" = 2006,
+  "Data07" = 2007,
+  "Data08" = 2008,
+  "Data09" = 2009,
+  "Data10" = 2010,
+  "Data11" = 2011,
+  "Data12" = 2012,
+  "Data13" = 2013,
+  "Data14" = 2014,
+  "Data15" = 2015,
+  "Data16" = 2016,
+  "Data17" = 2017,
+  "Data18" = 2018,
+  "Data19" = 2019,
+  "Data20" = 2020
+)
+
+# Step 1: Extract attendance rate data for all years
+extract_attendance_rate <- function(data, year) {
+  # Map dataset year to the corresponding attendance year ranges
+  campus_col <- paste0("CA0AT", sprintf("%02d", year - 2001), "R")
+  district_col <- paste0("CE0AT", sprintf("%02d", year - 2001), "R")
+  
+  # Check if the columns exist in the data
+  if (campus_col %in% colnames(data) && district_col %in% colnames(data)) {
+    data %>%
+      select(
+        CAMPUS,
+        Attendance_All = all_of(campus_col),  # Rename campus attendance column
+        Attendance_Econ_Dis = all_of(district_col) # Rename district attendance column
+      ) %>%
+      mutate(
+        CAMPUS_wo0 = str_replace(CAMPUS, "^0+", ""),  # Remove leading zeros
+        Year = as.character(year - 1)  # Adjust year to match attendance year
+      ) %>%
+      select(-CAMPUS)  # Drop original CAMPUS column to avoid confusion
+  } else {
+    # Return an empty data frame if columns are missing
+    tibble(CAMPUS_wo0 = character(), Attendance_All = numeric(), Attendance_Econ_Dis = numeric(), Year = character())
+  }
+}
+
+# Apply the function across all datasets and combine results
+attendance_data <- lapply(names(datasets), function(name) {
+  year <- datasets[[name]]
+  data <- get(name)
+  extract_attendance_rate(data, year)
+}) %>%
+  bind_rows()
+
+# Debugging checkpoint: Check the attendance data structure
+print(head(attendance_data))
+
+# Step 2: Merge attendance data into `panel_data_bare`
+panel_data_with_attendance <- panel_data_bare %>%
+  left_join(attendance_data, by = c("CAMPUS_wo0", "Year"))
+```
+
+```{r College Readiness Data Load, warning=FALSE} 
+extract_college_ready <- function(data, year) {
+  
+  # ----------------------------------------
+  #  A) Decide if year < 2013 (old) or >= 2013 (new)
+  #     You may adjust these variable names if your TEA data changes around 2012 or 2013 specifically.
+  # ----------------------------------------
+  if (year < 2013) {
+    # Example offset: For attendance, you did (year - 2001) as the suffix
+    suffix_2d <- sprintf("%02d", year - 2000)  
+    # Old variable names
+    math_campus_col    <- paste0("CATSIM", suffix_2d, "R")  # e.g. "CATSIM04R"
+    math_econ_col      <- paste0("CETSIM", suffix_2d, "R")  # e.g. "CETECM04R"
+    reading_campus_col <- paste0("CATSIR", suffix_2d, "R")  # e.g. "CATSIR04R"
+    reading_econ_col   <- paste0("CETSIR", suffix_2d, "R")  # e.g. "CETECO04R"
+    
+  } else {
+    # 2013 and later
+    suffix_2d <- sprintf("%02d", year - 2000)  
+    # New variable names
+    math_campus_col    <- paste0("CACRR", suffix_2d, "R")   # e.g. "CACRR13R"
+    math_econ_col      <- paste0("CECRM", suffix_2d, "R")   # e.g. "CECRM13R"
+    reading_campus_col <- paste0("CACRM", suffix_2d, "R")   # e.g. "CACRM13R"
+    reading_econ_col   <- paste0("CECRR", suffix_2d, "R")   # e.g. "CECRR13R"
+  }
+  
+  # ----------------------------------------
+  #  B) Check if these columns exist in the data. If not, return an empty tibble.
+  # ----------------------------------------
+  needed_cols <- c(math_campus_col, math_econ_col, reading_campus_col, reading_econ_col)
+  if (!all(needed_cols %in% colnames(data))) {
+    # Return an empty tibble
+    return(tibble(
+      CAMPUS_wo0                 = character(),
+      CollegeReady_Math_Campus   = numeric(),
+      CollegeReady_Math_Econ     = numeric(),
+      CollegeReady_Reading_Campus= numeric(),
+      CollegeReady_Reading_Econ  = numeric(),
+      Year                       = character()
+    ))
+  }
+  
+  # ----------------------------------------
+  #  C) Select and rename the columns, convert to numeric, unify types
+  # ----------------------------------------
+  data %>%
+    select(
+      CAMPUS,
+      all_of(math_campus_col),
+      all_of(math_econ_col),
+      all_of(reading_campus_col),
+      all_of(reading_econ_col)
+    ) %>%
+    rename(
+      CollegeReady_Math_Campus    = !!math_campus_col,
+      CollegeReady_Math_Econ      = !!math_econ_col,
+      CollegeReady_Reading_Campus = !!reading_campus_col,
+      CollegeReady_Reading_Econ   = !!reading_econ_col
+    ) %>%
+    mutate(
+      # Convert all 4 readiness columns to numeric (fix mismatch errors):
+      across(
+        c(CollegeReady_Math_Campus, CollegeReady_Math_Econ,
+          CollegeReady_Reading_Campus, CollegeReady_Reading_Econ),
+        ~ as.numeric(as.character(.x))
+      ),
+      CAMPUS_wo0 = str_replace(CAMPUS, "^0+", "")
+    ) %>%
+    select(-CAMPUS) %>%
+    
+    # ----------------------------------------
+    #  D) Assign the Year. 
+    #     EITHER replicate your attendance offset,
+    #     OR parse from variable names if needed.
+    # ----------------------------------------
+    mutate(
+      # For example, to replicate the attendance logic:
+      # 'Year' = year - 1
+      # If 'Data03' = 2003 => you used year -1 => '2002'
+      Year = as.character(year - 1)
+      
+      # If instead you want to parse from suffix_2d, you can do so here:
+      # Year = paste0("20", suffix_2d) # or some variant
+    )
+}
+
+
+college_ready_data <- map_dfr(names(datasets), function(name) {
+  year_val <- datasets[[name]]
+  df_year  <- get(name)  # the data frame (Data03, Data04, etc.)
+  extract_college_ready(df_year, year_val)
+})
+
+panel_data_with_attendance <- panel_data_with_attendance %>%
+  left_join(college_ready_data, by = c("CAMPUS_wo0", "Year"))
+
+drop(college_ready_data)
+```
+
+```{r Advanced Courses}
+library(dplyr)
+library(stringr)
+library(tibble)
+
+# Similar to extract_attendance_rate but for advanced courses
+extract_advanced_courses <- function(data, year) {
+  suffix_2d <- sprintf("%02d", year - 2001)
+  
+  campus_col <- paste0("CA0AD", suffix_2d, "R")
+  econ_col   <- paste0("CE0AD", suffix_2d, "R")
+  
+  # Check columns
+  if (all(c(campus_col, econ_col) %in% colnames(data))) {
+    
+    data %>%
+      select(
+        CAMPUS,
+        Campus_AdvancedCourses = all_of(campus_col),
+        Econ_AdvancedCourses   = all_of(econ_col)
+      ) %>%
+      # Convert them to numeric to ensure consistent type
+      mutate(
+        Campus_AdvancedCourses = as.numeric(as.character(Campus_AdvancedCourses)),
+        Econ_AdvancedCourses   = as.numeric(as.character(Econ_AdvancedCourses)),
+        
+        # Remove leading zeros
+        CAMPUS_wo0 = stringr::str_replace(CAMPUS, "^0+", ""),
+        
+        # If you truly need year - 1
+        Year = as.character(year - 1)
+      ) %>%
+      select(-CAMPUS)
+    
+  } else {
+    tibble(
+      CAMPUS_wo0 = character(),
+      Campus_AdvancedCourses = numeric(),
+      Econ_AdvancedCourses   = numeric(),
+      Year = character()
+    )
+  }
+}
+
+# 2A) Loop over each dataset name
+advancedcourses_data <- lapply(names(datasets), function(name) {
+  year_val <- datasets[[name]]  # numeric year (2003, etc.)
+  data_obj <- get(name)         # "Data03", "Data04", etc. from global env
+  extract_advanced_courses(data_obj, year_val)
+}) %>%
+  bind_rows()
+
+# 2B) Inspect the resulting data
+head(advancedcourses_data)
+
+panel_data_with_attendance <- panel_data_with_attendance %>%
+  left_join(advancedcourses_data, by = c("CAMPUS_wo0", "Year"))
+
+
+```
+
+```{r 4-Year Longitudanal Rate, warning = FALSE}
+extract_4yr_grad_rate <- function(data, year) {
+  # 1) Build the suffix
+  suffix_2d <- sprintf("%02d", year - 2000)
+  suffix_3d <- paste0("4", suffix_2d)
+  
+  # 2) Build the column names
+  econ_col   <- paste0("CEGC", suffix_3d, "R") 
+  campus_col <- paste0("CAGC", suffix_3d, "R")
+  
+  # 3) Check columns
+  needed_cols <- c(econ_col, campus_col)
+  if (!all(needed_cols %in% colnames(data))) {
+    return(tibble(
+      CAMPUS_wo0         = character(),
+      FourYrGrad_Econ    = numeric(),
+      FourYrGrad_Campus  = numeric(),
+      Year               = character()
+    ))
+  }
+  
+  # 4) Filter, rename, convert
+  data %>%
+    select(
+      CAMPUS,
+      FourYrGrad_Econ   = all_of(econ_col),
+      FourYrGrad_Campus = all_of(campus_col)
+    ) %>%
+    mutate(
+      CAMPUS_wo0 = stringr::str_replace(CAMPUS, "^0+", ""),
+      Year = as.character(year)
+    ) %>%
+    select(-CAMPUS) %>%
+    # Force these columns to be numeric
+    mutate(
+      across(
+        c(FourYrGrad_Econ, FourYrGrad_Campus),
+        ~ as.numeric(as.character(.x))
+      )
+    )
+}
+
+datasets <- list(
+  "Data03" = 2003,
+  "Data04" = 2004,
+  "Data05" = 2005,
+  "Data06" = 2006,
+  "Data07" = 2007,
+  "Data08" = 2008,
+  "Data09" = 2009,
+  "Data10" = 2010,
+  "Data11" = 2011,
+  "Data12" = 2012,
+  "Data13" = 2013,
+  "Data14" = 2014,
+  "Data15" = 2015,
+  "Data16" = 2016,
+  "Data17" = 2017,
+  "Data18" = 2018,
+  "Data19" = 2019
+)
+
+library(purrr)  # for map_dfr, or you can use lapply/bind_rows
+
+grad_rate_data <- map_dfr(names(datasets), function(name) {
+  year_val <- datasets[[name]]  # numeric year
+  data_obj <- get(name)         # e.g. Data04
+  extract_4yr_grad_rate(data_obj, year_val)
+})
+
+panel_data_with_attendance <- panel_data_with_attendance %>%
+  left_join(grad_rate_data, by = c("CAMPUS_wo0", "Year"))
+```
+
+```{r 4-Year Dropout Rate, warning = FALSE}
+extract_4yr_drop_rate <- function(data, year) {
+  
+  # Convert numeric year to 2-digit suffix, e.g. 2005 => "05", 2014 => "14"
+  suffix_2d <- sprintf("%02d", year - 2000)
+  
+  # Check if year < 2011 or >= 2011 to pick the right naming pattern
+  if (year < 2011) {
+    # old pattern, e.g. "CEDC405R", "CADC405R" for year=2005 => suffix="05"
+    econ_col   <- paste0("CEDC4", suffix_2d, "R")
+    campus_col <- paste0("CADC4", suffix_2d, "R")
+  } else {
+    # new pattern from 2011 onward, e.g. "CEDC4X11R", "CADC4X11R" for 2011 => suffix="11"
+    econ_col   <- paste0("CEDC4X", suffix_2d, "R")
+    campus_col <- paste0("CADC4X", suffix_2d, "R")
+  }
+  
+  # Now check if those columns exist
+  needed_cols <- c(econ_col, campus_col)
+  if (!all(needed_cols %in% colnames(data))) {
+    # If missing, return empty tibble
+    return(tibble(
+      CAMPUS_wo0         = character(),
+      FourYrDrop_Econ    = numeric(),
+      FourYrDrop_Campus  = numeric(),
+      Year               = character()
+    ))
+  }
+  
+  # Filter to high schools if needed (09-12) - only if your older code did so
+  # data <- data %>% filter(GRDSPAN == "09 - 12")
+  
+  # Select & rename
+  out <- data %>%
+    select(
+      CAMPUS,
+      FourYrDrop_Econ   = all_of(econ_col),
+      FourYrDrop_Campus = all_of(campus_col)
+    ) %>%
+    mutate(
+      CAMPUS_wo0 = stringr::str_replace(CAMPUS, "^0+", ""),
+      Year = as.character(year)
+    ) %>%
+    select(-CAMPUS) %>%
+    
+    # Convert columns to numeric
+    mutate(
+      across(
+        c(FourYrDrop_Econ, FourYrDrop_Campus),
+        ~ as.numeric(as.character(.x))
+      )
+    )
+  
+  out
+}
+
+
+datasets <- list(
+  "Data03" = 2003,
+  "Data04" = 2004,
+  "Data05" = 2005,
+  "Data06" = 2006,
+  "Data07" = 2007,
+  "Data08" = 2008,
+  "Data09" = 2009,
+  "Data10" = 2010,
+  "Data11" = 2011,
+  "Data12" = 2012,
+  "Data13" = 2013,
+  "Data14" = 2014,
+  "Data15" = 2015,
+  "Data16" = 2016,
+  "Data17" = 2017,
+  "Data18" = 2018,
+  "Data19" = 2019
+)
+
+library(purrr)  # for map_dfr, or you can use lapply/bind_rows
+
+grad_rate_data <- map_dfr(names(datasets), function(name) {
+  year_val <- datasets[[name]]  # numeric year
+  data_obj <- get(name)         # e.g. Data04
+  extract_4yr_drop_rate(data_obj, year_val)
+})
+
+panel_data_with_attendance <- panel_data_with_attendance %>%
+  left_join(grad_rate_data, by = c("CAMPUS_wo0", "Year"))
+```
+
+```{r Demographic Data, warning = FALSE}
+# Define a list of datasets and their corresponding years
+datasets <- list(
+  "Data03" = 2003,
+  "Data04" = 2004,
+  "Data05" = 2005,
+  "Data06" = 2006,
+  "Data07" = 2007,
+  "Data08" = 2008,
+  "Data09" = 2009,
+  "Data10" = 2010,
+  "Data11" = 2011,
+  "Data12" = 2012,
+  "Data13" = 2013,
+  "Data14" = 2014,
+  "Data15" = 2015,
+  "Data16" = 2016,
+  "Data17" = 2017,
+  "Data18" = 2018,
+  "Data19" = 2019
+)
+
+# List of consistent variables to retain across all years
+consistent_vars <- c(
+  "CAMPUS", "CPETG09C", "CPETG10C", "CPETG11C", "CPETG12C",
+  "CPETBLAC", "CPETHISC", "CPETWHIC", "CPETINDC", "CPETPACC",
+  "CPETECOC", "CPSTKIDR","GRDTYPE"
+)
+
+# Function to standardize and clean consistent data across years
+standardize_and_clean_data <- function(data, year) {
+  # Retain only consistent variables that exist in the dataset
+  existing_vars <- intersect(consistent_vars, colnames(data))
+  data <- data %>% select(any_of(existing_vars))
+  
+  # Standardize data types for consistent variables
+  data <- data %>%
+    mutate(
+      CAMPUS = if ("CAMPUS" %in% colnames(data)) as.character(CAMPUS) else NA_character_,
+      CPETG09C = if ("CPETG09C" %in% colnames(data)) as.numeric(CPETG09C) else NA_real_,
+      CPETG10C = if ("CPETG10C" %in% colnames(data)) as.numeric(CPETG10C) else NA_real_,
+      CPETG11C = if ("CPETG11C" %in% colnames(data)) as.numeric(CPETG11C) else NA_real_,
+      CPETG12C = if ("CPETG12C" %in% colnames(data)) as.numeric(CPETG12C) else NA_real_,
+      CPETBLAC = if ("CPETBLAC" %in% colnames(data)) as.numeric(CPETBLAC) else NA_real_,
+      CPETHISC = if ("CPETHISC" %in% colnames(data)) as.numeric(CPETHISC) else NA_real_,
+      CPETWHIC = if ("CPETWHIC" %in% colnames(data)) as.numeric(CPETWHIC) else NA_real_,
+      CPETINDC = if ("CPETINDC" %in% colnames(data)) as.numeric(CPETINDC) else NA_real_,
+      CPETPACC = if ("CPETPACC" %in% colnames(data)) as.numeric(CPETPACC) else NA_real_,
+      CPETECOC = if ("CPETECOC" %in% colnames(data)) as.numeric(CPETECOC) else NA_real_,
+      CPSTKIDR = if ("CPSTKIDR" %in% colnames(data)) as.numeric(CPSTKIDR) else NA_real_
+    )
+  
+  # Add the Year column as a character
+  data$Year <- as.character(year)
+  
+  return(data)
+}
+
+# Process each dataset, standardize, and store in a list
+standardized_datasets <- lapply(names(datasets), function(name) {
+  year <- datasets[[name]]
+  data <- get(name)  # Retrieve the dataset from the environment
+  standardize_and_clean_data(data, year)
+})
+
+# Combine all datasets into a single data frame
+combined_demographics <- bind_rows(standardized_datasets)
+
+combined_demographics$CAMPUS <- str_replace(combined_demographics$CAMPUS, "^0+", "")
+combined_demographics <- combined_demographics %>%
+  filter(GRDTYPE %in% c("S", "B")) %>%
+  arrange(CAMPUS)
+```
+
+```{r Demographics Merge}
+# Ensure CAMPUS identifiers match (remove leading zeros if necessary)
+combined_demographics <- combined_demographics %>%
+  mutate(CAMPUS = as.character(CAMPUS),
+         CAMPUS_wo0 = stringr::str_replace(CAMPUS, "^0+", ""))
+
+# Merge the demographic data into panel_data_with_attendance
+panel_data_with_demographics <- panel_data_with_attendance %>%
+  left_join(
+    combined_demographics %>%
+      select(-CAMPUS),  # Drop original CAMPUS to avoid duplication
+    by = c("CAMPUS_wo0" = "CAMPUS_wo0", "Year" = "Year")
+  )
+
+# Check the resulting dataset
+print(head(panel_data_with_demographics))
+```
+
+## Econ Adv Variable Creation
+
+```{r Enrollment Variable}
+panel_data_912 <- panel_data_with_demographics %>%
+  mutate(
+    CPETG09C = as.numeric(as.character(CPETG09C)),
+    CPETG10C = as.numeric(as.character(CPETG10C)),
+    CPETG11C = as.numeric(as.character(CPETG11C)),
+    CPETG12C = as.numeric(as.character(CPETG12C)),
+    CPETECOC = as.numeric(as.character(CPETECOC)),
+    enrollment = CPETG09C + CPETG10C + CPETG11C + CPETG12C
+  )
+```
+
+```{r Attendance Rate Econ Adv}
+panel_data_912 <- panel_data_912 %>%
+  mutate(
+    Attendance_All = as.numeric(as.character(Attendance_All)) / 100,  # Convert to decimal
+    Attendance_Econ_Dis = as.numeric(as.character(Attendance_Econ_Dis)) / 100,  # Convert to decimal
+    Econ_Adv_Enroll = enrollment - CPETECOC,
+    Econ_Adv_num = enrollment * Attendance_All - CPETECOC * Attendance_Econ_Dis,
+    Attendance_Econ_Adv = Econ_Adv_num / Econ_Adv_Enroll,
+    Attendance_Econ_Adv <- ifelse(Attendance_Econ_Adv >= -0.25 & Attendance_Econ_Adv <= 0, 0, Attendance_Econ_Adv)
+  )
+```
+
+```{r College Readiness Econ Adv}
+panel_data_912 <- panel_data_912 %>%
+  mutate(
+    CollegeReady_Math_Campus = CollegeReady_Math_Campus /100,
+    CollegeReady_Math_Econ = CollegeReady_Math_Econ /100,
+    CollegeReady_Reading_Campus = CollegeReady_Reading_Campus /100,
+    CollegeReady_Reading_Econ = CollegeReady_Reading_Econ /100,
+    Econ_Adv_num2 = enrollment * CollegeReady_Math_Campus - CPETECOC * CollegeReady_Math_Econ,
+    CollegeReady_Math_EconD = Econ_Adv_num2 / Econ_Adv_Enroll,
+    Econ_Adv_num3 = enrollment * CollegeReady_Reading_Campus - CPETECOC * CollegeReady_Reading_Econ,
+    CollegeReady_Reading_EconD = Econ_Adv_num3 / Econ_Adv_Enroll
+  )
+```
+
+```{r Advanced Courses Econ Adv}
+ panel_data_912 <- panel_data_912 %>%
+  mutate(
+    Campus_AdvancedCourses = as.numeric(Campus_AdvancedCourses),
+    Econ_AdvancedCourses = as.numeric(Econ_AdvancedCourses),
+    Campus_AdvancedCourses = Campus_AdvancedCourses /100,
+    Econ_AdvancedCourses = Econ_AdvancedCourses /100,
+    Econ_Adv_num4 = enrollment * Campus_AdvancedCourses - CPETECOC * Econ_AdvancedCourses,
+    AdvEcon_AdvancedCourses = Econ_Adv_num4 / Econ_Adv_Enroll
+  )
+```
+
+```{r 4 Year Longitudunal Rate Econ Adv}
+ panel_data_912 <- panel_data_912 %>%
+  mutate(
+    FourYrGrad_Campus = as.numeric(FourYrGrad_Campus),
+    FourYrGrad_Econ = as.numeric(FourYrGrad_Econ),
+    FourYrGrad_Campus = FourYrGrad_Campus /100,
+    FourYrGrad_Econ = FourYrGrad_Econ /100,
+    Econ_Adv_num5 = enrollment * FourYrGrad_Campus - CPETECOC * FourYrGrad_Econ,
+    FourYrGrad_EconAdv = Econ_Adv_num5 / Econ_Adv_Enroll,
+    FourYrGrad_EconAdv <- ifelse(FourYrGrad_EconAdv >= -0.25 & FourYrGrad_EconAdv <= 0, 0, FourYrGrad_EconAdv)
+  )
+```
+
+```{r 4 Year Dropout Rate Econ Adv}
+ panel_data_912 <- panel_data_912 %>%
+  mutate(
+    FourYrDrop_Campus = as.numeric(FourYrDrop_Campus),
+    FourYrDrop_Econ = as.numeric(FourYrDrop_Econ),
+    FourYrDrop_Campus = FourYrDrop_Campus /100,
+    FourYrDrop_Econ = FourYrDrop_Econ /100,
+    Econ_Adv_num6 = enrollment * FourYrDrop_Campus - CPETECOC * FourYrDrop_Econ,
+    FourYrDrop_EconAdv = Econ_Adv_num6 / Econ_Adv_Enroll,
+    FourYrDrop_EconAdv <- ifelse(FourYrDrop_EconAdv >= -0.25 & FourYrDrop_EconAdv <= 0, 0, FourYrDrop_EconAdv)
+  )
+```
+
+```{r Census api_key}
+census_api_key("adf87e468258cd4568fc47061d8b6cf2cfc31b81", overwrite = TRUE, install = TRUE)
+
+```
+
+```{r Read Data}
+readRenviron("~/.Renviron")
+```
+
+```{r Load in Data Example}
+tx_income <- get_acs(
+  geography = "county",
+  state = "TX",
+  variables = "B19013_001",  # Median household income
+  year = 2009,               # Most recent available
+  survey = "acs5",
+  output = "wide")
+
+head(tx_income)
+```
+
+```{r Load in years of Data}
+
+# Make sure you have your Census API key set:
+# census_api_key("YOUR_KEY_HERE", install=TRUE)
+
+# Loop to assign each year's data into separate data frames
+for (yr in 2010:2019) {
+  
+  # Pull the data
+  temp <- get_acs(
+    geography = "county",
+    state     = "TX",
+    variables = "B19013_001",  # Median household income
+    year      = yr,
+    survey    = "acs5",
+    output    = "wide"
+  ) %>%
+    mutate(year = yr)
+  
+  # Dynamically create data frame names like tx_income10, tx_income11, etc.
+  # by extracting the last two digits of the year
+  assign(paste0("tx_income", substr(yr, 3, 4)), temp)
+}
+
+# Now, merge everything together into one data frame
+# using mget to grab the objects by their names
+all_income <- bind_rows(mget(paste0("tx_income", 10:19)))
+
+# all_income will have county-level data for 2010-2019,
+# including a 'year' column indicating each row's year.
+all_income
+```
+
+```{r Map Counties}
+library(dplyr)
+
+# Suppose your academic outcomes dataset is called df_academic
+county_map <- panel_data_912 %>%
+  filter(!is.na(CNTYNAME)) %>% 
+  select(COUNTY, CNTYNAME) %>%
+  distinct()
+```
+
+```{r CNTYNAME fix}
+panel_data_912 <- panel_data_912 %>%
+  left_join(county_map, by = "COUNTY", suffix = c("", "_fixed")) %>%
+  mutate(
+    CNTYNAME = coalesce(CNTYNAME, CNTYNAME_fixed)
+  ) %>%
+  select(-CNTYNAME_fixed)
+```
+
+```{r CNTYNAME Case Fix}
+library(dplyr)
+library(stringr)
+
+# 1) In all_income, create a new column that removes " County, Texas"
+#    and converts the name to uppercase
+all_income <- all_income %>%
+  mutate(
+    CNTYNAME_FIX = str_to_upper(str_remove(NAME, " County, Texas$"))
+  )
+```
+
+```{r County Level Acadmeic Outcome Data}
+library(dplyr)
+
+df_county_year <- panel_data_912 %>%
+  group_by(CNTYNAME, Year) %>%
+  dplyr::summarize(
+    across(
+      where(is.numeric),
+      ~ mean(.x, na.rm = TRUE)
+    ),
+    .groups = "drop"
+  )
+
+```
+
+```{r Final Dataset}
+merged_data <- df_county_year %>%
+  left_join(
+    all_income %>% mutate(year = as.character(year)),
+    by = c("CNTYNAME" = "CNTYNAME_FIX", "Year" = "year")
+  )
+merged_data <- merged_data %>%
+  mutate(Year = as.integer(Year))
+merged_data <- merged_data %>% 
+  filter(Year > 2009 & Year < 2020)
+```
+
+```{r}
+final_data <- merged_data %>%
+  select(B19013_001E, enrollment, FourYrDrop_Campus, FourYrGrad_Campus, CollegeReady_Math_Campus, CollegeReady_Reading_Campus, Attendance_All, Year, CNTYNAME, NAME)
+```
+
+```{r}
+write.csv(final_data, file = "/Users/owenlindstrom/Documents/2025/Stat 112/portfolio-Owen298628/Final Project/final_data.csv", row.names = FALSE)
+```
+
+
+

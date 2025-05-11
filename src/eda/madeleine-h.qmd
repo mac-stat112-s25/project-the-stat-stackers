@@ -1,0 +1,24 @@
+---
+title: "Madeleine H"
+format: html
+---
+
+```{r}
+
+library(here)
+library(tidyverse)
+library(DataExplorer)
+
+getwd()
+
+final_data <- read_csv(here("data", "final_data.csv"))
+
+```
+```{r}
+
+introduce(final_data)
+plot_intro(final_data)
+plot_missing(final_data)
+
+
+```
